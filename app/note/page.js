@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
+import Link from "next/link";
+import TypographyPanel from "../../components/note/TypographyPanel";
+import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
+import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -10,15 +14,21 @@ const topActions = [
 ];
 
 const editingActions = [
-  { label: "Tilføj indhold", icon: "add-item.svg" },
-  { label: "Skift farve", icon: "palette.svg" },
-  { label: "Tekstformatering", icon: "A.svg" },
-  { label: "Markér note", icon: "checkbox.svg" },
+  { label: "Tilføj indhold", icon: "add-item.svg", panel: "items" },
+  { label: "Skift farve", icon: "palette.svg", panel: "colors" },
+  { label: "Tekstformatering", icon: "A.svg", panel: "typography" },
+  { label: "Tilføj checkliste", icon: "checkbox.svg" },
 ];
 
-function IconButton({ label, icon, className = "" }) {
+function IconButton({ label, icon, className = "", onClick, expanded }) {
   return (
-    <button className={`${styles.iconButton} ${className}`} type="button" aria-label={label}>
+    <button
+      className={`${styles.iconButton} ${className}`}
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      aria-expanded={expanded}
+    >
       <img src={`/icons/${icon}`} alt="" />
     </button>
   );
@@ -29,27 +39,25 @@ export default function NotePage() {
   const [body, setBody] = useState("");
   const [titleFocused, setTitleFocused] = useState(false);
   const [bodyFocused, setBodyFocused] = useState(false);
+  const [activePanel, setActivePanel] = useState(null);
+  const [noteColor, setNoteColor] = useState("var(--colors-sticky-notes-standard)");
+
+  function togglePanel(panel) {
+    setActivePanel((currentPanel) => currentPanel === panel ? null : panel);
+  }
+
+  function closePanel() {
+    setActivePanel(null);
+  }
 
   return (
-    <main className={styles.screen}>
-      <div className={styles.statusBar} aria-hidden="true">
-        <span className={styles.time}>10.56</span>
-        <div className={styles.statusDetails}>
-          <span>4G</span>
-          <span className={styles.signal}>
-            <i />
-            <i />
-            <i />
-            <i />
-          </span>
-          <span className={styles.battery}><i /></span>
-        </div>
-      </div>
-
+    <main className={styles.screen} style={{ backgroundColor: noteColor }}>
       <div className={styles.noteLayout}>
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling">
-            <IconButton label="Tilbage" icon="arrow-left.svg" className={styles.plainButton} />
+            <Link href="/" className={`${styles.iconButton} ${styles.plainButton}`} aria-label="Tilbage til forsiden">
+              <img src="/icons/arrow-left.svg" alt="" />
+            </Link>
             <div className={styles.topActions}>
               {topActions.map((action) => (
                 <IconButton key={action.icon} {...action} />
@@ -84,13 +92,29 @@ export default function NotePage() {
 
         <footer className={styles.bottomBar} aria-label="Noteværktøjer">
           <div className={styles.editingActions}>
-            {editingActions.map((action) => (
-              <IconButton key={action.icon} {...action} />
+            {editingActions.map(({ panel, ...action }) => (
+              <IconButton
+                key={action.icon}
+                {...action}
+                onClick={panel ? () => togglePanel(panel) : undefined}
+                expanded={panel ? activePanel === panel : undefined}
+              />
             ))}
           </div>
           <IconButton label="Flere muligheder" icon="more-vert.svg" />
         </footer>
       </div>
+
+      {activePanel && (
+        <>
+          <button className={styles.panelBackdrop} type="button" aria-label="Luk værktøjspanel" onClick={closePanel} />
+          {activePanel === "typography" && <TypographyPanel onClose={closePanel} />}
+          {activePanel === "items" && <NoteAddItemsPanel />}
+          {activePanel === "colors" && (
+            <ColorPickerPanel selectedColor={noteColor} onSelectColor={setNoteColor} />
+          )}
+        </>
+      )}
     </main>
   );
 }

@@ -6,8 +6,8 @@
   padding: 0 16px 16px;
   display: flex;
   flex-direction: column;
-  background: #f5f5f5;
-  color: #0a0a0a;
+  background: var(--colors-neutral-100);
+  color: var(--colors-text);
 }
 
 .statusBar {
@@ -62,7 +62,7 @@
   top: 3px;
   right: -4px;
   border-radius: 0 2px 2px 0;
-  background: #a1a1a1;
+  background: var(--colors-neutral-400);
 }
 
 .battery i {
@@ -117,8 +117,18 @@
   border: 0;
   border-radius: 50%;
   background: transparent;
+  outline: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid var(--colors-neutral-500);
+  outline-offset: 2px;
+}
+
+.iconButton:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .iconButton::before {
@@ -128,7 +138,7 @@
   position: absolute;
   z-index: 0;
   border-radius: 50%;
-  background: rgb(229 229 229 / 70%);
+  background: color-mix(in srgb, var(--colors-neutral-200) 70%, transparent);
 }
 
 .plainButton::before {
@@ -142,13 +152,6 @@
   position: relative;
   z-index: 1;
   object-fit: contain;
-}
-
-.iconButton:focus-visible,
-.titleInput:focus-visible,
-.bodyInput:focus-visible {
-  outline: 2px solid #737373;
-  outline-offset: 2px;
 }
 
 .titleHeading {
@@ -169,17 +172,17 @@
   outline: none;
   background: transparent;
   font: inherit;
-  color: #0a0a0a;
+  color: var(--colors-text);
 }
 
 .titleInput {
   height: 40px;
-  caret-color: #262626;
+  caret-color: var(--colors-neutral-800);
 }
 
 .titleInput::placeholder,
 .bodyInput::placeholder {
-  color: #737373;
+  color: var(--colors-neutral-500);
   opacity: 1;
 }
 
@@ -190,7 +193,17 @@
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.48px;
-  caret-color: #262626;
+  caret-color: var(--colors-neutral-800);
+}
+
+.panelBackdrop {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
 }
 
 @media (max-width: 360px) {
