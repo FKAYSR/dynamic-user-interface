@@ -1,0 +1,10 @@
+﻿<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="S&#195;&#184;ge side ikoner">
+<g id="checkbox">
+<g id="check">
+<path d="M6 4V5H18V4V3H6V4ZM20 6H19V18H20H21V6H20ZM18 20V19H6V20V21H18V20ZM4 18H5V6H4H3V18H4ZM6 20V19C5.44772 19 5 18.5523 5 18H4H3C3 19.6569 4.34315 21 6 21V20ZM20 18H19C19 18.5523 18.5523 19 18 19V20V21C19.6569 21 21 19.6569 21 18H20ZM18 4V5C18.5523 5 19 5.44772 19 6H20H21C21 4.34315 19.6569 3 18 3V4ZM6 4V3C4.34315 3 3 4.34315 3 6H4H5C5 5.44772 5.44772 5 6 5V4Z" fill="#262626"/>
+<path id="Vector" d="M7 12.6245L11.0465 15.8804L16.5165 8.89193" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+</svg>
