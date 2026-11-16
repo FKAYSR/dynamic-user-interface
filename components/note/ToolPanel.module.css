@@ -31,13 +31,22 @@
   background: transparent;
   cursor: pointer;
   outline: none;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   -webkit-tap-highlight-color: transparent;
+}
+
+.typeTool:active {
+  background: var(--colors-neutral-200);
 }
 
 .typeTool img {
   display: block;
   max-width: 48px;
   max-height: 48px;
+  position: relative;
+  z-index: 2;
 }
 
 .separatedTool {
@@ -74,6 +83,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.itemRow:active {
+  background: var(--colors-neutral-200);
+}
+
 .itemRow img {
   display: block;
   flex: 0 0 auto;
@@ -84,21 +97,6 @@
 .itemRow > span:last-child {
   position: relative;
   z-index: 1;
-}
-
-.ripple {
-  width: var(--ripple-size);
-  height: var(--ripple-size);
-  position: absolute;
-  z-index: 0;
-  top: var(--ripple-y);
-  left: var(--ripple-x);
-  border-radius: 50%;
-  background: var(--colors-neutral-300);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(0);
-  animation: itemRipple 520ms ease-out forwards;
 }
 
 .colorPanel {
@@ -145,6 +143,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.colorOption:active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--colors-neutral-500);
+  opacity: 0.2;
+}
+
 .selectedColor {
   border: 2px solid var(--colors-marked);
 }
@@ -166,12 +173,6 @@
   to { transform: translateY(0); }
 }
 
-@keyframes itemRipple {
-  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0); }
-  65% { opacity: 0.45; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-}
-
 .typeTool:focus-visible,
 .itemRow:focus-visible,
 .colorOption:focus-visible {
@@ -187,5 +188,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .panel { animation-duration: 1ms; }
-  .ripple { animation-duration: 1ms; }
 }

@@ -1,0 +1,24 @@
+.ripple {
+  width: var(--ripple-size);
+  height: var(--ripple-size);
+  position: absolute;
+  z-index: 1;
+  top: var(--ripple-y);
+  left: var(--ripple-x);
+  border-radius: 50%;
+  background: var(--colors-neutral-300);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  animation: itemRipple 520ms ease-out forwards;
+}
+
+@keyframes itemRipple {
+  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0); }
+  65% { opacity: 0.45; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ripple { animation-duration: 1ms; }
+}

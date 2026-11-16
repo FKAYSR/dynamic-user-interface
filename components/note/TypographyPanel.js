@@ -1,4 +1,5 @@
 import styles from "./ToolPanel.module.css";
+import RippleEffect, { useRipple } from "./RippleEffect";
 
 const tools = [
   { label: "Overskrift 1", icon: "h1.svg" },
@@ -14,18 +15,29 @@ export default function TypographyPanel({ onClose }) {
   return (
     <section className={`${styles.panel} ${styles.typographyPanel}`} aria-label="Typografi">
       {tools.map((tool) => (
-        <button
-          className={`${styles.typeTool} ${tool.separated ? styles.separatedTool : ""}`}
-          type="button"
-          aria-label={tool.label}
-          key={tool.icon}
-        >
-          <img src={`/icons/${tool.icon}`} alt="" />
-        </button>
+        <TypographyButton key={tool.icon} tool={tool} />
       ))}
-      <button className={styles.typeTool} type="button" aria-label="Luk typografi" onClick={onClose}>
-        <img src="/icons/cancel.svg" alt="" />
-      </button>
+      <TypographyButton tool={{ label: "Luk typografi", icon: "cancel.svg" }} onClick={onClose} />
     </section>
+  );
+}
+
+function TypographyButton({ tool, onClick }) {
+  const { ripple, triggerRipple, finishRipple } = useRipple();
+
+  return (
+    <button
+      className={`${styles.typeTool} ${tool.separated ? styles.separatedTool : ""}`}
+      type="button"
+      aria-label={tool.label}
+      onPointerDown={triggerRipple}
+      onClick={(event) => {
+        if (event.detail === 0) triggerRipple(event);
+        onClick?.();
+      }}
+    >
+      <RippleEffect ripple={ripple} onFinish={finishRipple} />
+      <img src={`/icons/${tool.icon}`} alt="" />
+    </button>
   );
 }

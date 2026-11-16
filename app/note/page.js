@@ -6,6 +6,7 @@ import Link from "next/link";
 import TypographyPanel from "../../components/note/TypographyPanel";
 import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
 import ColorPickerPanel from "../../components/note/ColorPickerPanel";
+import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -21,16 +22,42 @@ const editingActions = [
 ];
 
 function IconButton({ label, icon, className = "", onClick, expanded }) {
+  const { ripple, triggerRipple, finishRipple } = useRipple();
+
   return (
     <button
       className={`${styles.iconButton} ${className}`}
       type="button"
       aria-label={label}
-      onClick={onClick}
+      onPointerDown={triggerRipple}
+      onClick={(event) => {
+        if (event.detail === 0) triggerRipple(event);
+        onClick?.(event);
+      }}
       aria-expanded={expanded}
     >
+      <RippleEffect ripple={ripple} onFinish={finishRipple} />
       <img src={`/icons/${icon}`} alt="" />
     </button>
+  );
+}
+
+function IconLink({ href, label, icon, className = "" }) {
+  const { ripple, triggerRipple, finishRipple } = useRipple();
+
+  return (
+    <Link
+      href={href}
+      className={`${styles.iconButton} ${className}`}
+      aria-label={label}
+      onPointerDown={triggerRipple}
+      onClick={(event) => {
+        if (event.detail === 0) triggerRipple(event);
+      }}
+    >
+      <RippleEffect ripple={ripple} onFinish={finishRipple} />
+      <img src={`/icons/${icon}`} alt="" />
+    </Link>
   );
 }
 
@@ -113,24 +140,27 @@ export default function NotePage() {
       ? cursor.current
       : { start: currentBlock.text.length, end: currentBlock.text.length };
     const checklistBlock = createBlock("checklist");
-    const followingParagraph = createBlock("paragraph", "");
 
     if (currentBlock.type === "paragraph") {
       const before = currentBlock.text.slice(0, selection.start);
       const after = currentBlock.text.slice(selection.end);
+      const insertedBlocks = [checklistBlock];
 
-      if (currentBlock.text.length === 0) {
+      if (after.length > 0) {
+        insertedBlocks.push(createBlock("paragraph", after));
+      }
+
+      if (currentBlock.text.length === 0 || before.length === 0) {
         setBlocks((currentBlocks) => {
           const nextBlocks = [...currentBlocks];
-          nextBlocks.splice(index, 1, checklistBlock, followingParagraph);
+          nextBlocks.splice(index, 1, ...insertedBlocks);
           return nextBlocks;
         });
       } else {
         const precedingParagraph = { ...currentBlock, text: before };
-        followingParagraph.text = after;
         setBlocks((currentBlocks) => {
           const nextBlocks = [...currentBlocks];
-          nextBlocks.splice(index, 1, precedingParagraph, checklistBlock, followingParagraph);
+          nextBlocks.splice(index, 1, precedingParagraph, ...insertedBlocks);
           return nextBlocks;
         });
       }
@@ -140,7 +170,7 @@ export default function NotePage() {
 
     setBlocks((currentBlocks) => {
       const nextBlocks = [...currentBlocks];
-      nextBlocks.splice(index + 1, 0, checklistBlock, followingParagraph);
+      nextBlocks.splice(index + 1, 0, checklistBlock);
       return nextBlocks;
     });
     focusBlock(checklistBlock.id);
@@ -159,9 +189,7 @@ export default function NotePage() {
       <div className={styles.noteLayout}>
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling">
-            <Link href="/" className={`${styles.iconButton} ${styles.plainButton}`} aria-label="Tilbage til forsiden">
-              <img src="/icons/arrow-left.svg" alt="" />
-            </Link>
+            <IconLink href="/" label="Tilbage til forsiden" icon="arrow-left.svg" className={styles.plainButton} />
             <div className={styles.topActions}>
               {topActions.map((action) => (
                 <IconButton key={action.icon} {...action} />

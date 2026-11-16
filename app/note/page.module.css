@@ -125,7 +125,13 @@
   background: transparent;
   outline: none;
   cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
   -webkit-tap-highlight-color: transparent;
+}
+
+.iconButton:active::before {
+  background: var(--colors-neutral-300);
 }
 
 .iconButton:focus-visible {
@@ -151,12 +157,16 @@
   display: none;
 }
 
+.plainButton:active::before {
+  display: block;
+}
+
 .iconButton img {
   display: block;
   max-width: 48px;
   max-height: 48px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   object-fit: contain;
 }
 
