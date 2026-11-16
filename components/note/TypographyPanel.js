@@ -2,27 +2,32 @@ import styles from "./ToolPanel.module.css";
 import RippleEffect, { useRipple } from "./RippleEffect";
 
 const tools = [
-  { label: "Overskrift 1", icon: "h1.svg" },
-  { label: "Overskrift 2", icon: "h2.svg" },
-  { label: "Tekststørrelse", icon: "Aa.svg" },
-  { label: "Fed", icon: "bold.svg", separated: true },
-  { label: "Kursiv", icon: "italic.svg" },
-  { label: "Understreget", icon: "underline.svg" },
-  { label: "Fjern formatering", icon: "remove-styling.svg" },
+  { label: "Overskrift 1", icon: "h1.svg", action: "h1" },
+  { label: "Overskrift 2", icon: "h2.svg", action: "h2" },
+  { label: "Normal tekst", icon: "Aa.svg", action: "normal" },
+  { label: "Fed", icon: "bold.svg", action: "bold", separated: true },
+  { label: "Kursiv", icon: "italic.svg", action: "italic" },
+  { label: "Understreget", icon: "underline.svg", action: "underline" },
+  { label: "Fjern formatering", icon: "remove-styling.svg", action: "clear" },
 ];
 
-export default function TypographyPanel({ onClose }) {
+export default function TypographyPanel({ onClose, onFormat, activeFormat }) {
   return (
     <section className={`${styles.panel} ${styles.typographyPanel}`} aria-label="Typografi">
       {tools.map((tool) => (
-        <TypographyButton key={tool.icon} tool={tool} />
+        <TypographyButton
+          key={tool.icon}
+          tool={tool}
+          selected={activeFormat?.[tool.action]}
+          onClick={() => onFormat(tool.action)}
+        />
       ))}
       <TypographyButton tool={{ label: "Luk typografi", icon: "cancel.svg" }} onClick={onClose} />
     </section>
   );
 }
 
-function TypographyButton({ tool, onClick }) {
+function TypographyButton({ tool, onClick, selected = false }) {
   const { ripple, triggerRipple, finishRipple } = useRipple();
 
   return (
@@ -30,6 +35,7 @@ function TypographyButton({ tool, onClick }) {
       className={`${styles.typeTool} ${tool.separated ? styles.separatedTool : ""}`}
       type="button"
       aria-label={tool.label}
+      aria-pressed={tool.action ? Boolean(selected) : undefined}
       onPointerDown={triggerRipple}
       onClick={(event) => {
         if (event.detail === 0) triggerRipple(event);

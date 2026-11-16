@@ -176,6 +176,34 @@ export default function NotePage() {
     focusBlock(checklistBlock.id);
   }
 
+  function applyTypography(action) {
+    const block = blocks.find((item) => item.id === activeBlockId);
+    if (!block) return;
+
+    let changes;
+    if (action === "h1") changes = { heading: "h1" };
+    else if (action === "h2") changes = { heading: "h2" };
+    else if (action === "normal") changes = { heading: null };
+    else if (action === "bold") changes = { bold: !block.bold };
+    else if (action === "italic") changes = { italic: !block.italic };
+    else if (action === "underline") changes = { underline: !block.underline };
+    else if (action === "clear") changes = { heading: null, bold: false, italic: false, underline: false };
+    else return;
+
+    updateBlock(block.id, changes);
+    const position = cursor.current.blockId === block.id ? cursor.current.end : block.text.length;
+    setFocusedBlockId(block.id);
+    requestAnimationFrame(() => {
+      const field = blockRefs.current.get(block.id);
+      if (!field) return;
+      field.style.height = "auto";
+      field.style.height = `${field.scrollHeight}px`;
+      field.focus();
+      field.setSelectionRange(position, position);
+      cursor.current = { blockId: block.id, start: position, end: position };
+    });
+  }
+
   function togglePanel(panel) {
     setActivePanel((currentPanel) => currentPanel === panel ? null : panel);
   }
@@ -183,6 +211,16 @@ export default function NotePage() {
   function closePanel() {
     setActivePanel(null);
   }
+
+  const currentBlock = blocks.find((block) => block.id === activeBlockId);
+  const activeFormat = {
+    h1: currentBlock?.heading === "h1",
+    h2: currentBlock?.heading === "h2",
+    normal: !currentBlock?.heading,
+    bold: Boolean(currentBlock?.bold),
+    italic: Boolean(currentBlock?.italic),
+    underline: Boolean(currentBlock?.underline),
+  };
 
   return (
     <main className={styles.screen} style={{ backgroundColor: noteColor }}>
@@ -232,6 +270,21 @@ export default function NotePage() {
                     placeholder={block.type === "paragraph" && !block.text && focusedBlockId !== block.id ? "Skriv en note..." : ""}
                     value={block.text}
                     rows={1}
+                    style={{
+                      fontSize: block.heading === "h1"
+                        ? "2rem"
+                        : block.heading === "h2"
+                          ? "1.5rem"
+                          : undefined,
+                      fontWeight: block.heading || block.bold
+                        ? "var(--typography-weight-bold)"
+                        : undefined,
+                      fontStyle: block.italic ? "italic" : undefined,
+                      textDecoration: [
+                        block.underline ? "underline" : "",
+                        block.checked ? "line-through" : "",
+                      ].filter(Boolean).join(" ") || undefined,
+                    }}
                     onFocus={(event) => {
                       setFocusedBlockId(block.id);
                       rememberCursor(block.id, event.currentTarget);
@@ -272,7 +325,13 @@ export default function NotePage() {
       {activePanel && (
         <>
           <button className={styles.panelBackdrop} type="button" aria-label="Luk værktøjspanel" onClick={closePanel} />
-          {activePanel === "typography" && <TypographyPanel onClose={closePanel} />}
+          {activePanel === "typography" && (
+            <TypographyPanel
+              onClose={closePanel}
+              onFormat={applyTypography}
+              activeFormat={activeFormat}
+            />
+          )}
           {activePanel === "items" && <NoteAddItemsPanel />}
           {activePanel === "colors" && (
             <ColorPickerPanel selectedColor={noteColor} onSelectColor={setNoteColor} />

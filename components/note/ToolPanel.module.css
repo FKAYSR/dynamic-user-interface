@@ -41,6 +41,16 @@
   background: var(--colors-neutral-200);
 }
 
+.typeTool[aria-pressed="true"]::before {
+  width: 40px;
+  height: 40px;
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--colors-neutral-200) 70%, transparent);
+}
+
 .typeTool img {
   display: block;
   max-width: 48px;
