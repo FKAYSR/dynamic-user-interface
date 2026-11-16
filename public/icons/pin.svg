@@ -1,9 +1,3 @@
-﻿<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Note knapper ikoner">
-<g id="pin">
-<g id="Frame 276">
-<path id="Vector" d="M23.9932 26.0918L24.0068 32M29.4664 26.0918H18.5336V24.0735L21.0183 22.0551L20.5215 16H27.4787L26.9817 22.0551L29.4664 24.0735L29.4664 26.0918Z" stroke="#262626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-</g>
-</g>
+<svg width="13" height="18" viewBox="0 0 13 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6.45961 11.0918L6.4732 17M11.9328 11.0918H1V9.07346L3.48472 7.0551L2.98787 1H9.94509L9.44806 7.0551L11.9328 9.07346L11.9328 11.0918Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#262626"/>
 </svg>

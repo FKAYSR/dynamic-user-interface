@@ -15,16 +15,16 @@
   --colors-neutral-900: hsl(0 0% 9%);
   --colors-neutral-950: hsl(0 0% 4%);
 
-  --colors-sticky-notes-beige: hsl(12 58% 92%);
-  --colors-sticky-notes-blå: hsl(201 40% 77%);
-  --colors-sticky-notes-fersken: hsl(20 84% 71%);
-  --colors-sticky-notes-grøn: hsl(165 38% 79%);
-  --colors-sticky-notes-gul: hsl(94 66% 90%);
-  --colors-sticky-notes-lavendel: hsl(283 28% 80%);
-  --colors-sticky-notes-lyserød: hsl(5 89% 82%);
-  --colors-sticky-notes-standard: hsl(60 94% 79%);
-  --colors-sticky-notes-støvblå: hsl(43 32% 87%);
-  --colors-sticky-notes-tyrkis: hsl(202 41% 88%);
+  --colors-sticky-notes-standard: var(--colors-neutral-100);
+  --colors-sticky-notes-lyserød: hsl(342 91% 83%);
+  --colors-sticky-notes-fersken: hsl(22 92% 77%);
+  --colors-sticky-notes-gul: hsl(38 70% 70%);
+  --colors-sticky-notes-grøn: hsl(122 42% 74%);
+  --colors-sticky-notes-tyrkis: hsl(173 58% 66%);
+  --colors-sticky-notes-støvblå: hsl(195 62% 74%);
+  --colors-sticky-notes-blå: hsl(205 100% 77%);
+  --colors-sticky-notes-lavendel: hsl(254 100% 87%);
+  --colors-sticky-notes-beige: hsl(41 50% 72%);
 
   --icons-background: transparent;
   --icons-stroke-color: var(--colors-neutral-800);
@@ -48,17 +48,6 @@
 
 @media (max-width: 768px) {
   :root {
-    --colors-sticky-notes-beige: hsl(41 50% 72%);
-    --colors-sticky-notes-blå: hsl(205 100% 77%);
-    --colors-sticky-notes-fersken: hsl(22 92% 77%);
-    --colors-sticky-notes-grøn: hsl(122 42% 74%);
-    --colors-sticky-notes-gul: hsl(38 70% 70%);
-    --colors-sticky-notes-lavendel: hsl(254 100% 87%);
-    --colors-sticky-notes-lyserød: hsl(342 91% 83%);
-    --colors-sticky-notes-standard: var(--colors-neutral-100);
-    --colors-sticky-notes-støvblå: hsl(195 62% 74%);
-    --colors-sticky-notes-tyrkis: hsl(173 58% 66%);
-
     --s-border-radius: 0.75rem;
     --sizing-note-card-width: 12.125rem;
     --sizing-screen-width: 25.75rem;
