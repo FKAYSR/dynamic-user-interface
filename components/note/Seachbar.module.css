@@ -1,0 +1,24 @@
+.container {
+  display: flex;
+  padding: 0 1.25rem;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 0;
+  border-radius: 62.4375rem;
+  background: var(--colors-neutral-200, #e5e5e5);
+}
+
+.text {
+  display: flex;
+  height: 3rem;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--colors-neutral-700, #404040);
+  font-family: Inter;
+  font-size: var(--typography-sizes-lngere-tekst, 1rem);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.03rem;
+}

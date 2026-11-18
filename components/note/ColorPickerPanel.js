@@ -1,17 +1,5 @@
 import styles from "./ToolPanel.module.css";
-
-const colors = [
-  { name: "Standard", value: "var(--colors-sticky-notes-standard)", icon: "droplet.svg" },
-  { name: "Lyserød", value: "var(--colors-sticky-notes-lyserød)" },
-  { name: "Fersken", value: "var(--colors-sticky-notes-fersken)" },
-  { name: "Gul", value: "var(--colors-sticky-notes-gul)" },
-  { name: "Grøn", value: "var(--colors-sticky-notes-grøn)" },
-  { name: "Turkis", value: "var(--colors-sticky-notes-tyrkis)" },
-  { name: "Lyseblå", value: "var(--colors-sticky-notes-støvblå)" },
-  { name: "Blå", value: "var(--colors-sticky-notes-blå)" },
-  { name: "Lavendel", value: "var(--colors-sticky-notes-lavendel)" },
-  { name: "Beige", value: "var(--colors-sticky-notes-beige)" },
-];
+import noteColors from "./noteColors";
 
 export default function ColorPickerPanel({ selectedColor, onSelectColor }) {
   return (
@@ -22,7 +10,7 @@ export default function ColorPickerPanel({ selectedColor, onSelectColor }) {
     >
       <h2>Farver</h2>
       <div className={styles.colorOptions}>
-        {colors.map((color) => {
+        {noteColors.map((color) => {
           const selected = color.value === selectedColor;
           return (
             <button

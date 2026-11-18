@@ -1,3 +1,36 @@
+.header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.touchArea {
+  display: flex;
+  width: 3rem;
+  height: 3rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  aspect-ratio: 1/1;
+}
+
+.avatar {
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 62.4375rem;
+  border: 3px solid #383e61;
+  background: url(https://images.unsplash.com/photo-1632765854612-9b02b6ec2b15?q=80&w=772&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D)
+    lightgray 50% / cover no-repeat;
+}
+
 .page {
   --background: var(--colors-neutral-50);
   --foreground: var(--colors-neutral-50);
@@ -22,12 +55,12 @@
   display: flex;
   flex: 1;
   width: 100%;
-  max-width: 800px;
+  max-width: var(--sizing-screen-width, 90rem);
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: stretch;
+  justify-content: flex-start;
   background-color: var(--colors-neutral-50);
-  padding: 120px 60px;
+  padding: 2rem 1.5rem;
 }
 
 .intro {
@@ -109,7 +142,7 @@ a.secondary {
 
 @media (max-width: 600px) {
   .main {
-    padding: 48px 24px;
+    padding: 1.5rem 1rem;
   }
 
   .intro {
