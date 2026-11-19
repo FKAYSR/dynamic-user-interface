@@ -1,0 +1,102 @@
+.page {
+  width: 100%;
+  min-height: 100vh;
+  padding-top: 40px;
+  background: var(--colors-background);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 14px;
+}
+
+.sectionHeading h2 {
+  color: var(--colors-text);
+  font-size: 12px;
+  font-weight: var(--typography-weight-bold);
+  line-height: 1;
+}
+
+.moreButton {
+  padding: 0;
+  border: 0;
+  color: var(--colors-neutral-500);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.itemRow,
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.itemRow::-webkit-scrollbar,
+.colorRow::-webkit-scrollbar {
+  display: none;
+}
+
+.colorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 16px 32px;
+  border-radius: 20px 20px 0 0;
+}
+
+.colorSection h2 {
+  color: var(--colors-text);
+  font-size: var(--typography-sizes-længere-tekst);
+  font-weight: var(--typography-weight-regular);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.colorButton {
+  display: flex;
+  flex: 0 0 56px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.colorSwatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--colors-neutral-500);
+  border-radius: var(--full-circle);
+  background: var(--swatch-color);
+}
+
+.colorSwatch img {
+  display: block;
+  width: 24px;
+  height: 24px;
+}

@@ -6,7 +6,7 @@ const colors = [
   { name: "Fersken", value: "var(--colors-sticky-notes-fersken)" },
   { name: "Gul", value: "var(--colors-sticky-notes-gul)" },
   { name: "Grøn", value: "var(--colors-sticky-notes-grøn)" },
-  { name: "Turkis", value: "var(--colors-sticky-notes-tyrkis)" },
+  { name: "Turkis", value: "var(--colors-sticky-notes-turkis)" },
   { name: "Lyseblå", value: "var(--colors-sticky-notes-støvblå)" },
   { name: "Blå", value: "var(--colors-sticky-notes-blå)" },
   { name: "Lavendel", value: "var(--colors-sticky-notes-lavendel)" },

@@ -1,0 +1,41 @@
+.item {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  max-width: 104px;
+  padding: 0;
+  border: 0;
+  color: var(--icons-stroke-color);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.iconCircle {
+  display: flex;
+  flex: 0 0 56px;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--full-circle);
+  background: var(--item-color, color-mix(in srgb, var(--colors-neutral-200) 70%, transparent));
+}
+
+.iconCircle img {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.title {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--icons-stroke-color);
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
