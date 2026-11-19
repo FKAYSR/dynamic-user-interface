@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./SearchField.module.css";
 
-export default function SearchField({ placeholder = "Søg i Google Keep", backHref = "/" }) {
+export default function SearchField({ placeholder = "Søg i Keep Noter", backHref = "/" }) {
   return (
     <form className={styles.searchBar} role="search">
       <Link className={styles.backButton} href={backHref} aria-label="Tilbage">
