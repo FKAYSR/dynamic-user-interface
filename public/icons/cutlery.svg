@@ -1,7 +1,7 @@
-﻿<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="S&#195;&#184;ge side ikoner">
-<g id="clutery">
-<path id="Vector" d="M6.05408 20H9.15086M9.15086 20H12.2476M9.15086 20V14.8387M9.15086 14.8387C9.15086 14.8387 5.53788 12.9064 4.5057 10.7097C3.39136 8.33814 4.5057 4 4.5057 4H13.796C13.796 4 14.9104 8.33814 13.796 10.7097C12.7638 12.9064 9.15086 14.8387 9.15086 14.8387ZM17.4089 20V11.7419C17.4089 11.7419 19.9896 10.7097 19.9896 8.64516V4M17.4089 8.12903V4" stroke="#262626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-</g>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 20H9M12 20H9M9 20V15" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M17 20V12C17 12 19.5 11 19.5 9C19.5 7.24264 19.5 4.5 19.5 4.5" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M17 8.5V4.5" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M4.50005 11C5.49998 13.1281 9.00005 15 9.00005 15C9.00005 15 12.5001 13.1281 13.5 11C14.5796 8.70257 13.5 4.5 13.5 4.5L4.50005 4.5C4.50005 4.5 3.42053 8.70257 4.50005 11Z" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
+
