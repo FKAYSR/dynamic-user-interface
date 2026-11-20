@@ -1,4 +1,5 @@
 import styles from "./ToolPanel.module.css";
+import noteColors from "./noteColors";
 
 const colors = [
   { name: "Standard", value: "var(--colors-sticky-notes-standard)", icon: "droplet.svg" },
@@ -22,7 +23,7 @@ export default function ColorPickerPanel({ selectedColor, onSelectColor }) {
     >
       <h2>Farver</h2>
       <div className={styles.colorOptions}>
-        {colors.map((color) => {
+        {noteColors.map((color) => {
           const selected = color.value === selectedColor;
           return (
             <button
