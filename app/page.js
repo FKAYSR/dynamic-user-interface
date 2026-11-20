@@ -2,6 +2,10 @@ import styles from "./page.module.css";
 import Seachbar from "@/components/note/Seachbar";
 import NoteGrid from "@/components/note/NoteGrid";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/supabase/server";
+
+export const instant = false;
 
 const notes = [
   {
@@ -21,7 +25,16 @@ const notes = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (user.user_metadata?.onboarding_complete !== true) {
+    redirect("/preboarding");
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
