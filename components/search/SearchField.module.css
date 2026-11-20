@@ -1,0 +1,41 @@
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px;
+  background: var(--colors-background);
+  box-shadow: 0 4px 2px rgb(0 0 0 / 4%);
+}
+
+.backButton {
+  display: flex;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.backButton img {
+  display: block;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--colors-text);
+  background: transparent;
+  font: 400 15px/1 var(--typography-font-family-tekst);
+}
+
+.input::placeholder {
+  color: var(--colors-neutral-400);
+  opacity: 1;
+}
+
+.input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
