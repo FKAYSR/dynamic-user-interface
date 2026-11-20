@@ -24,6 +24,16 @@ async function signIn(formData) {
   });
 
   if (error || !data.user) {
+    if (error) {
+      console.error("Supabase sign-in failed:", {
+        name: error.name,
+        code: error.code,
+        status: error.status,
+        message: error.message,
+      });
+    } else {
+      console.error("Supabase sign-in returned no user and no error.");
+    }
     redirect("/login?error=true");
   }
 
