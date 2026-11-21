@@ -17,6 +17,7 @@ export default async function SpecificNotePage({ params }) {
     .select("id, title, content, color, paper, type")
     .eq("id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) {

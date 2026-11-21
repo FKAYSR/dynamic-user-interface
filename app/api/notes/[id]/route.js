@@ -37,6 +37,7 @@ export async function PATCH(request, { params }) {
     })
     .eq("id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .select("id")
     .maybeSingle();
 
@@ -52,4 +53,36 @@ export async function PATCH(request, { params }) {
   revalidatePath(`/note/${id}`);
 
   return NextResponse.json({ id });
+}
+
+export async function DELETE(request, { params }) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const supabase = await createClient();
+  const deletedAt = new Date().toISOString();
+  const { data: note, error } = await supabase
+    .from("notes")
+    .update({ archived: true, deleted_at: deletedAt })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .select("id,deleted_at")
+    .maybeSingle();
+
+  if (error) {
+    return NextResponse.json({ error: "Could not move note to recycle bin" }, { status: 500 });
+  }
+  if (!note) {
+    return NextResponse.json({ error: "Note not found" }, { status: 404 });
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/note/${id}`);
+
+  return NextResponse.json({ id: note.id, deletedAt: note.deleted_at });
 }

@@ -131,6 +131,10 @@ export default function NotePage({ initialNote = null }) {
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
+  const [binHalfFull, setBinHalfFull] = useState(false);
   const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
   const [saveStatus, setSaveStatus] = useState("");
   const saveStatusTimeout = useRef(null);
@@ -383,18 +387,56 @@ export default function NotePage({ initialNote = null }) {
   }
 
   function deleteNote() {
-    setTitle("");
-    setBlocks([{ id: 1, type: "paragraph", text: "" }]);
-    setNoteColor("var(--colors-sticky-notes-standard)");
-    setPaperLayout("blank");
-    setActiveBlockId(1);
-    setFocusedBlockId(null);
-    nextBlockId.current = 1;
+    if (isDeleting) return;
+
+    setDeleteDialogOpen(false);
+    setDeleteError(false);
+    setBinHalfFull(false);
+    setIsDeleting(true);
+
+    const animationDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 1350;
+    const binAnimationDelay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 972;
+
+    window.setTimeout(() => setBinHalfFull(true), binAnimationDelay);
+
+    window.setTimeout(async () => {
+      try {
+        if (initialNote?.id) {
+          const response = await fetch(`/api/notes/${initialNote.id}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) throw new Error("Kunne ikke slette noten.");
+        }
+
+        router.push("/");
+        router.refresh();
+      } catch {
+        setIsDeleting(false);
+        setBinHalfFull(false);
+        setDeleteError(true);
+        setDeleteDialogOpen(true);
+      }
+    }, animationDuration);
+  }
+
+  function requestDeleteNote() {
     closePanel();
+    setDeleteError(false);
+    setDeleteDialogOpen(true);
+  }
+
+  function cancelDeleteNote() {
+    setDeleteDialogOpen(false);
+    setDeleteError(false);
+    setBinHalfFull(false);
   }
 
   function selectMoreAction(action) {
-    if (action === "delete") deleteNote();
+    if (action === "delete") requestDeleteNote();
     else if (action === "label") setActivePanel("labels");
     else if (action === "paper") setActivePanel("paper");
   }
@@ -411,7 +453,7 @@ export default function NotePage({ initialNote = null }) {
 
   return (
     <main className={styles.screen} style={{ backgroundColor: noteColor }}>
-      <div className={styles.noteLayout}>
+      <div className={styles.noteLayout} inert={deleteDialogOpen || undefined}>
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling" style={{ backgroundColor: noteColor }}>
             <IconControl
@@ -435,7 +477,10 @@ export default function NotePage({ initialNote = null }) {
             </div>
           </nav>
 
-          <section className={styles.editor} aria-label="Redigér note">
+          <section
+            className={`${styles.editor} ${isDeleting ? styles.editorThrowing : ""}`}
+            aria-label="Redigér note"
+          >
             <h2 className={styles.titleHeading}>
               <input
                 className={styles.titleInput}
@@ -569,6 +614,31 @@ export default function NotePage({ initialNote = null }) {
             />
           )}
         </>
+      )}
+
+      {(deleteDialogOpen || isDeleting) && (
+        <div
+          className={styles.deleteAnimation}
+          role={deleteDialogOpen ? "dialog" : undefined}
+          aria-modal={deleteDialogOpen ? "true" : undefined}
+          aria-labelledby={deleteDialogOpen ? "delete-note-prompt" : undefined}
+        >
+          {deleteDialogOpen && (
+            <>
+              <p id="delete-note-prompt" className={styles.deletePrompt}>Vil du slette noten?</p>
+              <div className={styles.deleteActions}>
+                <button type="button" onClick={cancelDeleteNote}>Afbryd</button>
+                <button type="button" onClick={deleteNote}>Ja, slet</button>
+              </div>
+            </>
+          )}
+          <div className={styles.trashCan} aria-hidden="true">
+            <img src={binHalfFull ? "/icons/bin-half-full.svg" : "/icons/bin.svg"} alt="" />
+          </div>
+        </div>
+      )}
+      {deleteError && (
+        <p className={styles.deleteError} role="alert">Kunne ikke slette noten. Prøv igen.</p>
       )}
     </main>
   );

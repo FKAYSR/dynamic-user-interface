@@ -50,6 +50,7 @@ export default async function Home() {
     .select("id, title, content, color, type, pinned, archived, created_at")
     .eq("user_id", user.id)
     .eq("archived", false)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) {
