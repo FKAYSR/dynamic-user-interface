@@ -105,6 +105,18 @@
   align-items: center;
 }
 
+.noteNav {
+  position: relative;
+}
+
+.saveStatus {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--colors-neutral-600);
+  font-size: 0.75rem;
+}
+
 .noteNav,
 .bottomBar {
   justify-content: space-between;

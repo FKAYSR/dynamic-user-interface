@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import Link from "next/link";
 import TypographyPanel from "../../components/note/TypographyPanel";
@@ -45,7 +46,7 @@ function IconButton({ label, icon, className = "", onClick, expanded }) {
   );
 }
 
-function IconLink({ href, label, icon, className = "" }) {
+function IconLink({ href, label, icon, className = "", onClick }) {
   const { ripple, triggerRipple, finishRipple } = useRipple();
 
   return (
@@ -56,6 +57,7 @@ function IconLink({ href, label, icon, className = "" }) {
       onPointerDown={triggerRipple}
       onClick={(event) => {
         if (event.detail === 0) triggerRipple(event);
+        onClick?.(event);
       }}
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
@@ -65,6 +67,7 @@ function IconLink({ href, label, icon, className = "" }) {
 }
 
 export default function NotePage({ initialNote = null }) {
+  const router = useRouter();
   const [title, setTitle] = useState(initialNote?.title ?? "");
   const [titleFocused, setTitleFocused] = useState(false);
   const [blocks, setBlocks] = useState(() =>
@@ -78,7 +81,8 @@ export default function NotePage({ initialNote = null }) {
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
-  const [paperLayout, setPaperLayout] = useState("blank");
+  const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
+  const [saveStatus, setSaveStatus] = useState("");
   const [noteColor, setNoteColor] = useState(
     initialNote?.color
       ? (noteColors.find((color) => color.id === initialNote.color)?.value
@@ -90,16 +94,62 @@ export default function NotePage({ initialNote = null }) {
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
 
-  async function selectNoteColor(color) {
+  async function saveNote() {
+    if (!initialNote?.id) return false;
+
+    const matchingColor = noteColors.find((color) => color.value === noteColor);
+    const content = blocks.map((block) => block.text).join("\n");
+
+    setSaveStatus("Gemmer...");
+    try {
+      const response = await fetch(`/api/notes/${initialNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          color: matchingColor?.id ?? "standard",
+          paper: paperLayout,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Kunne ikke gemme noten.");
+      setSaveStatus("Gemt");
+      return true;
+    } catch {
+      setSaveStatus("Kunne ikke gemme");
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    if (!initialNote?.id) return;
+
+    const timeoutId = window.setTimeout(() => {
+      const matchingColor = noteColors.find((color) => color.value === noteColor);
+      const content = blocks.map((block) => block.text).join("\n");
+
+      setSaveStatus("Gemmer...");
+      fetch(`/api/notes/${initialNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          color: matchingColor?.id ?? "standard",
+          paper: paperLayout,
+        }),
+      }).then((response) => {
+        setSaveStatus(response.ok ? "Gemt" : "Kunne ikke gemme");
+      }).catch(() => setSaveStatus("Kunne ikke gemme"));
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [initialNote?.id, title, blocks, noteColor, paperLayout]);
+
+  function selectNoteColor(color) {
     setNoteColor(color);
     document.documentElement.style.setProperty("--baggrund", color);
-    window.localStorage.setItem("defaultNoteColor", color);
-
-    await fetch("/api/preferences", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ defaultNoteColorValue: color }),
-    });
   }
 
   function createBlock(type, text = "") {
@@ -273,7 +323,20 @@ export default function NotePage({ initialNote = null }) {
       <div className={styles.noteLayout}>
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling">
-            <IconLink href="/" label="Tilbage til forsiden" icon="arrow-left.svg" className={styles.plainButton} />
+            <IconLink
+              href="/"
+              label="Tilbage til forsiden"
+              icon="arrow-left.svg"
+              className={styles.plainButton}
+              onClick={async (event) => {
+                event.preventDefault();
+                await saveNote();
+                router.push("/");
+              }}
+            />
+            <span className={styles.saveStatus} role="status" aria-live="polite">
+              {saveStatus}
+            </span>
             <div className={styles.topActions}>
               {topActions.map((action) => (
                 <IconButton key={action.icon} {...action} />

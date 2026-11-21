@@ -12,9 +12,6 @@ export async function createNote() {
   }
 
   const supabase = await createClient();
-  const defaultColor =
-    user.user_metadata?.default_note_color ||
-    "standard";
 
   const { data: note, error } = await supabase
     .from("notes")
@@ -22,7 +19,7 @@ export async function createNote() {
       user_id: user.id,
       title: "",
       content: "",
-      color: defaultColor,
+      color: "standard",
       type: "text",
       pinned: false,
       archived: false,
@@ -38,3 +35,4 @@ export async function createNote() {
   revalidatePath("/");
   redirect(`/note/${note.id}`);
 }
+
