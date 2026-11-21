@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import TypographyPanel from "../../components/note/TypographyPanel";
 import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
 import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
+import noteColors from "../../components/note/noteColors";
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -61,37 +62,41 @@ function IconLink({ href, label, icon, className = "" }) {
   );
 }
 
-export default function NotePage() {
-  const [title, setTitle] = useState("");
+export default function NotePage({ initialNote = null }) {
+  const [title, setTitle] = useState(initialNote?.title ?? "");
   const [titleFocused, setTitleFocused] = useState(false);
-  const [blocks, setBlocks] = useState([{ id: 1, type: "paragraph", text: "" }]);
+  const [blocks, setBlocks] = useState(() =>
+    initialNote?.content
+      ? initialNote.content
+          .split("\n")
+          .filter((text, index, lines) => text.length > 0 || lines.length === 1)
+          .map((text, index) => ({ id: index + 1, type: "paragraph", text }))
+      : [{ id: 1, type: "paragraph", text: "" }],
+  );
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
-  const [noteColor, setNoteColor] = useState("var(--baggrund)");
-  const nextBlockId = useRef(1);
+  const [noteColor, setNoteColor] = useState(
+    initialNote?.color
+      ? (noteColors.find((color) => color.id === initialNote.color)?.value
+        ?? noteColors.find((color) => color.value === initialNote.color)?.value
+        ?? "var(--baggrund)")
+      : "var(--baggrund)",
+  );
+  const nextBlockId = useRef(initialNote?.content?.split("\n").length ?? 1);
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
 
-  useEffect(() => {
-    const savedColor = window.localStorage.getItem("defaultNoteColor");
-    if (!savedColor) {
-      document.documentElement.style.setProperty("--baggrund", noteColor);
-      return;
-    }
-
-    const frame = window.requestAnimationFrame(() => {
-      setNoteColor(savedColor);
-      document.documentElement.style.setProperty("--baggrund", savedColor);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [noteColor]);
-
-  function selectNoteColor(color) {
+  async function selectNoteColor(color) {
     setNoteColor(color);
     document.documentElement.style.setProperty("--baggrund", color);
     window.localStorage.setItem("defaultNoteColor", color);
+
+    await fetch("/api/preferences", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ defaultNoteColorValue: color }),
+    });
   }
 
   function createBlock(type, text = "") {

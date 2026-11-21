@@ -3,27 +3,9 @@ import Seachbar from "@/components/note/Seachbar";
 import NoteGrid from "@/components/note/NoteGrid";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 
 export const instant = false;
-
-const notes = [
-  {
-    id: "sample-note-1",
-    title: "Planlæg næste workshop",
-    content:
-      "Saml idéer fra teamet, lav en kort agenda, og husk at sende materialet ud inden mødet. Der er mere tekst her, så kortet viser hvordan indholdet begrænses efter fem linjer.",
-    sharedPerson: { name: "Alex Jensen" },
-    color: "lavender",
-  },
-  {
-    id: "sample-note-2",
-    title: "Idéer til projektet",
-    content:
-      "En kort note uden delt person. Billede, person og farve er valgfri datafelter.",
-    color: "yellow",
-  },
-];
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -34,6 +16,25 @@ export default async function Home() {
   if (user.user_metadata?.onboarding_complete !== true) {
     redirect("/preboarding");
   }
+
+  const supabase = await createClient();
+  const { data: notes, error } = await supabase
+    .from("notes")
+    .select("id, title, content, color, type, pinned, archived, created_at")
+    .eq("user_id", user.id)
+    .eq("archived", false)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  const noteCards = (notes ?? []).map((note) => ({
+    id: note.id,
+    title: note.title,
+    content: note.content,
+    color: note.color || "standard",
+  }));
 
   return (
     <div className={styles.page}>
@@ -51,7 +52,7 @@ export default async function Home() {
         </div>
       </header>
       <main className={styles.main}>
-        <NoteGrid notes={notes} />
+        <NoteGrid notes={noteCards} />
       </main>
     </div>
   );
