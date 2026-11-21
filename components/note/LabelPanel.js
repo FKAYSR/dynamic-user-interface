@@ -95,17 +95,17 @@ export default function LabelPanel({ noteId, onClose }) {
   return (
     <section className={`${styles.panel} ${styles.labelPanel}`} aria-label="Tilføj etiket">
       <div className={styles.labelHeader}>
-        <h2>Tilføj etiket</h2>
+        <h2>Føj etiket til note</h2>
         <button className={styles.labelClose} type="button" aria-label="Luk" onClick={onClose}><img src="/icons/cancel.svg" alt="" /></button>
       </div>
       <div className={styles.labelSearch}>
         <button className={styles.labelIconButton} type="button" aria-label="Vælg etiketikon" aria-expanded={iconPickerOpen} onClick={() => setIconPickerOpen((open) => !open)}>
           <img src={`/icons/${icon}`} alt="" />
         </button>
-        <input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Søg eller opret etiket"
+        <input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Angiv etiketnavn"
           onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); submitQuery(); } if (event.key === "Escape") setQuery(""); }} />
         {query && <button className={styles.labelClear} type="button" aria-label="Ryd søgning" onClick={() => setQuery("")}>×</button>}
-        <button className={styles.labelSubmit} type="button" aria-label="Vælg eller opret etiket" onClick={submitQuery}><img src="/icons/checkbox.svg" alt="" /></button>
+        {!query && <span className={styles.labelSearchIcon} aria-hidden="true" />}
       </div>
       {iconPickerOpen && <div className={styles.iconPicker} role="dialog" aria-label="Alle ikoner">
         <header className={styles.iconPickerHeader}>
@@ -128,10 +128,16 @@ export default function LabelPanel({ noteId, onClose }) {
           return <button className={styles.labelOption} type="button" key={label.id} aria-pressed={selected}
             onClick={() => saveSelectedIds(selected ? selectedIds.filter((id) => id !== label.id) : [...selectedIds, label.id])}>
             <img src={`/icons/${label.icon || "tag.svg"}`} alt="" /><span>{label.name}</span>
-            <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src="/icons/checkbox.svg" alt="" />}</span>
+            <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src="/icons/check.svg" alt="" />}</span>
           </button>;
-        }) : <span className={styles.labelEmpty}>Ingen etiketter fundet</span>}
+        }) : query.trim() ? null : <span className={styles.labelEmpty}>Ingen etiketter fundet</span>}
       </div>
+      {query.trim() && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
+        <button className={styles.labelCreate} type="button" onClick={submitQuery}>
+          <img src="/icons/plus.svg" alt="" />
+          <span>Opret <strong>"{query.trim()}"</strong></span>
+        </button>
+      )}
     </section>
   );
 }

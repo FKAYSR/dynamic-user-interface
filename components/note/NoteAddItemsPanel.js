@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./ToolPanel.module.css";
-import RippleEffect, { useRipple } from "./RippleEffect";
+import PanelAction from "./PanelAction";
 
 const items = [
   { label: "Tag billede", icon: "kamera.svg" },
@@ -10,28 +10,11 @@ const items = [
   { label: "Tegning", icon: "tegning.svg" },
 ];
 
-function NoteAddItem({ item }) {
-  const { ripple, triggerRipple, finishRipple } = useRipple();
-
-  return (
-    <button
-      className={styles.itemRow}
-      type="button"
-      onPointerDown={triggerRipple}
-      onClick={(event) => event.detail === 0 && triggerRipple(event)}
-    >
-      <RippleEffect ripple={ripple} onFinish={finishRipple} />
-      <img src={`/icons/${item.icon}`} alt="" />
-      <span>{item.label}</span>
-    </button>
-  );
-}
-
 export default function NoteAddItemsPanel() {
   return (
     <section className={`${styles.panel} ${styles.itemsPanel}`} aria-label="Tilføj til note">
       {items.map((item) => (
-        <NoteAddItem item={item} key={item.icon} />
+        <PanelAction key={item.icon} icon={item.icon} label={item.label} />
       ))}
     </section>
   );

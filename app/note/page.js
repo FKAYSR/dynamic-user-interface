@@ -99,13 +99,14 @@ const editingActions = [
   { label: "Tilføj checkliste", icon: "checkbox.svg", command: "checklist" },
 ];
 
-function IconButton({ label, icon, className = "", onClick, expanded }) {
+function IconControl({ href, label, icon, className = "", onClick, expanded }) {
   const { ripple, triggerRipple, finishRipple } = useRipple();
+  const Control = href ? Link : "button";
 
   return (
-    <button
+    <Control
+      {...(href ? { href } : { type: "button" })}
       className={`${styles.iconButton} ${className}`}
-      type="button"
       aria-label={label}
       onPointerDown={triggerRipple}
       onClick={(event) => {
@@ -116,27 +117,7 @@ function IconButton({ label, icon, className = "", onClick, expanded }) {
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
       <img src={`/icons/${icon}`} alt="" />
-    </button>
-  );
-}
-
-function IconLink({ href, label, icon, className = "", onClick }) {
-  const { ripple, triggerRipple, finishRipple } = useRipple();
-
-  return (
-    <Link
-      href={href}
-      className={`${styles.iconButton} ${className}`}
-      aria-label={label}
-      onPointerDown={triggerRipple}
-      onClick={(event) => {
-        if (event.detail === 0) triggerRipple(event);
-        onClick?.(event);
-      }}
-    >
-      <RippleEffect ripple={ripple} onFinish={finishRipple} />
-      <img src={`/icons/${icon}`} alt="" />
-    </Link>
+    </Control>
   );
 }
 
@@ -185,7 +166,7 @@ export default function NotePage({ initialNote = null }) {
     }
   }, []);
 
-  async function saveNote() {
+  const saveNote = useCallback(async () => {
     if (!initialNote?.id) return false;
 
     const matchingColor = noteColors.find((color) => color.value === noteColor);
@@ -212,33 +193,15 @@ export default function NotePage({ initialNote = null }) {
       showSaveStatus("Kunne ikke gemme");
       return false;
     }
-  }
+  }, [initialNote?.id, title, blocks, noteColor, paperLayout, showSaveStatus]);
 
   useEffect(() => {
     if (!initialNote?.id) return;
 
-    const timeoutId = window.setTimeout(() => {
-      const matchingColor = noteColors.find((color) => color.value === noteColor);
-      const content = encodeContent(blocks);
-
-      showSaveStatus("Gemmer...");
-      fetch(`/api/notes/${initialNote.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content,
-          color: matchingColor?.id ?? "standard",
-          paper: paperLayout,
-          type: getNoteType(blocks),
-        }),
-      }).then((response) => {
-        showSaveStatus(response.ok ? "Gemt" : "Kunne ikke gemme");
-      }).catch(() => showSaveStatus("Kunne ikke gemme"));
-    }, 600);
+    const timeoutId = window.setTimeout(saveNote, 600);
 
     return () => window.clearTimeout(timeoutId);
-  }, [initialNote?.id, title, blocks, noteColor, paperLayout, showSaveStatus]);
+  }, [initialNote?.id, saveNote]);
 
   function selectNoteColor(color) {
     setNoteColor(color);
@@ -451,7 +414,7 @@ export default function NotePage({ initialNote = null }) {
       <div className={styles.noteLayout}>
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling">
-            <IconLink
+            <IconControl
               href="/"
               label="Tilbage til forsiden"
               icon="arrow-left.svg"
@@ -467,7 +430,7 @@ export default function NotePage({ initialNote = null }) {
             </span>
             <div className={styles.topActions}>
               {topActions.map((action) => (
-                <IconButton key={action.icon} {...action} />
+                <IconControl key={action.icon} {...action} />
               ))}
             </div>
           </nav>
@@ -554,7 +517,7 @@ export default function NotePage({ initialNote = null }) {
         >
           <div className={styles.editingActions}>
             {editingActions.map(({ panel, command, ...action }) => (
-              <IconButton
+              <IconControl
                 key={action.icon}
                 {...action}
                 onClick={panel ? () => togglePanel(panel) : command === "checklist" ? insertChecklist : undefined}
@@ -562,7 +525,7 @@ export default function NotePage({ initialNote = null }) {
               />
             ))}
           </div>
-          <IconButton
+          <IconControl
             label="Flere muligheder"
             icon="more-vert.svg"
             onClick={() => togglePanel("more")}
