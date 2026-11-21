@@ -1,14 +1,17 @@
 .card {
   position: relative;
   display: flex;
-  width: var(--sizing-note-card-width, 13.5rem);
-  min-height: 16.75rem;
+  width: 100%;
+  min-height: 0;
   flex-direction: column;
   align-items: stretch;
   gap: 0.75rem;
   padding: 0.75rem;
-  border-radius: var(--s-border-radius, 1rem);
+  border: 1px solid var(--colors-neutral-300, #d4d4d4);
+  border-radius: 12px;
   color: var(--colors-neutral-950, #0a0a0a);
+  overflow: hidden;
+  text-decoration: none;
 }
 
 .image {
@@ -107,6 +110,8 @@
     var(--typography-font-family-tekst, Inter, Arial, sans-serif);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 5;
+  line-clamp: 5;
+  text-overflow: ellipsis;
   overflow-wrap: anywhere;
 }
 
