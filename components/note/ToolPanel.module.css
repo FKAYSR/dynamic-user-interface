@@ -116,6 +116,245 @@
   flex-direction: column;
 }
 
+.labelPanel {
+  height: min(420px, 75dvh);
+  padding: 16px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.labelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.labelHeader h2 {
+  margin: 0;
+  font: 600 18px/24px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+}
+
+.labelClose {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.labelSearch {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border: 1px solid var(--colors-neutral-400);
+  border-radius: 12px;
+  background: var(--colors-neutral-50);
+}
+
+.labelIconButton,
+.labelSubmit,
+.labelClear {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--colors-neutral-700);
+  cursor: pointer;
+}
+
+.labelIconButton {
+  width: 24px;
+  height: 24px;
+}
+
+.labelIconButton img {
+  width: 20px;
+  height: 20px;
+}
+
+.labelSearch input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--colors-text);
+  font: 400 16px/24px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+}
+
+.labelClear {
+  width: 24px;
+  height: 32px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.labelSubmit {
+  width: 28px;
+  height: 32px;
+}
+
+.labelSubmit img {
+  width: 22px;
+  height: 22px;
+}
+
+.iconPicker {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px;
+  background: var(--colors-background);
+}
+
+.iconPickerHeader {
+  min-height: 52px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--colors-neutral-300);
+}
+
+.iconPickerHeader h3 {
+  font: 500 16px/20px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+}
+
+.iconPickerHeader span {
+  display: block;
+  margin-top: 2px;
+  color: var(--colors-neutral-600);
+  font: 400 12px/16px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+}
+
+.iconPickerHeader button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.iconPickerList {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 8px;
+}
+
+.iconCategory {
+  margin-bottom: 12px;
+}
+
+.iconCategory h4 {
+  margin-bottom: 6px;
+  font: 500 14px/18px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+  text-transform: capitalize;
+}
+
+.iconCategory > div {
+  display: grid;
+  grid-template-columns: repeat(6, 40px);
+  gap: 4px;
+}
+
+.iconCategory button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.iconCategory button:hover,
+.iconCategory button[aria-pressed="true"] {
+  background: var(--colors-neutral-200);
+}
+
+.iconCategory img {
+  width: 24px;
+  height: 24px;
+}
+
+.labelList {
+  min-height: 96px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.labelOption,
+.labelCreate button {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--colors-text);
+  text-align: left;
+  font: 400 16px/24px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+  cursor: pointer;
+}
+
+.labelOption > img {
+  width: 20px;
+  height: 20px;
+}
+
+.labelOption > span:nth-child(2) {
+  flex: 1;
+}
+
+.labelCheckbox {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--colors-neutral-500);
+  border-radius: 4px;
+}
+
+.labelChecked {
+  border-color: var(--colors-marked);
+  background: var(--colors-marked);
+}
+
+.labelCheckbox img {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) invert(1);
+}
+
+.labelEmpty {
+  display: block;
+  padding: 16px 0;
+  color: var(--colors-neutral-600);
+  font-size: 14px;
+}
+
+.labelCreate {
+  flex: 0 0 auto;
+}
+
+.labelCreate button {
+  border-top: 1px solid var(--colors-neutral-300);
+}
+
 .paperPanel {
   height: 180px;
   padding: 16px 16px 32px;

@@ -10,6 +10,7 @@ import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
 import MoreMenuPanel from "../../components/note/MoreMenuPanel";
 import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
+import LabelPanel from "../../components/note/LabelPanel";
 import noteColors from "../../components/note/noteColors";
 
 function decodeInitialContent(content) {
@@ -431,7 +432,7 @@ export default function NotePage({ initialNote = null }) {
 
   function selectMoreAction(action) {
     if (action === "delete") deleteNote();
-    else if (action === "label") closePanel();
+    else if (action === "label") setActivePanel("labels");
     else if (action === "paper") setActivePanel("paper");
   }
 
@@ -591,6 +592,9 @@ export default function NotePage({ initialNote = null }) {
           )}
           {activePanel === "more" && (
             <MoreMenuPanel onSelect={selectMoreAction} />
+          )}
+          {activePanel === "labels" && (
+            <LabelPanel noteId={initialNote?.id} onClose={closePanel} />
           )}
           {activePanel === "paper" && (
             <PaperLayoutPanel
