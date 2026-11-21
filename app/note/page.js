@@ -152,6 +152,13 @@ export default function NotePage({ initialNote = null }) {
   const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
   const [saveStatus, setSaveStatus] = useState("");
   const saveStatusTimeout = useRef(null);
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimeout.current) {
+        window.clearTimeout(saveStatusTimeout.current);
+      }
+    };
+  }, []);
   const [noteColor, setNoteColor] = useState(
     initialNote?.color
       ? (noteColors.find((color) => color.id === initialNote.color)?.value
@@ -269,6 +276,30 @@ export default function NotePage({ initialNote = null }) {
   }
 
   function handleBlockKeyDown(event, block, index) {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (index > 0) {
+        const previousBlock = blocks[index - 1];
+        focusBlock(previousBlock.id, previousBlock.text.length);
+      } else {
+        requestAnimationFrame(() => {
+          const titleField = document.querySelector('[aria-label="Titel"]');
+          titleField?.focus();
+          titleField?.setSelectionRange(title.length, title.length);
+        });
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      if (index < blocks.length - 1) {
+        event.preventDefault();
+        const nextBlock = blocks[index + 1];
+        focusBlock(nextBlock.id, 0);
+      }
+      return;
+    }
+
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (block.type === "checklist" && block.text.length === 0) {
@@ -285,6 +316,17 @@ export default function NotePage({ initialNote = null }) {
         return nextBlocks;
       });
       focusBlock(nextBlock.id);
+      return;
+    }
+
+    if (
+      (event.key === "Backspace" || event.key === "Delete")
+      && block.type === "checklist"
+      && block.text.length === 0
+    ) {
+      event.preventDefault();
+      updateBlock(block.id, { type: "paragraph", checked: false });
+      focusBlock(block.id);
       return;
     }
 
@@ -530,7 +572,12 @@ export default function NotePage({ initialNote = null }) {
 
       {activePanel && (
         <>
-          <button className={styles.panelBackdrop} type="button" aria-label="Luk værktøjspanel" onClick={closePanel} />
+          <button
+            className={`${styles.panelBackdrop} ${activePanel === "typography" ? styles.typographyBackdrop : ""}`}
+            type="button"
+            aria-label="Luk værktøjspanel"
+            onClick={closePanel}
+          />
           {activePanel === "typography" && (
             <TypographyPanel
               onClose={closePanel}
@@ -543,10 +590,7 @@ export default function NotePage({ initialNote = null }) {
             <ColorPickerPanel selectedColor={noteColor} onSelectColor={selectNoteColor} />
           )}
           {activePanel === "more" && (
-            <MoreMenuPanel
-              onSelect={selectMoreAction}
-              backgroundColor={noteColor}
-            />
+            <MoreMenuPanel onSelect={selectMoreAction} />
           )}
           {activePanel === "paper" && (
             <PaperLayoutPanel

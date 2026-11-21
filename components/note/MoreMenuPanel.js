@@ -4,7 +4,7 @@ import RippleEffect, { useRipple } from "./RippleEffect";
 const actions = [
   { id: "delete", label: "Slet note", icon: "bin.svg" },
   { id: "label", label: "Tilføj etiket", icon: "tag.svg" },
-  { id: "paper", label: "Skift papir layout", icon: "layout-left.svg" },
+  { id: "paper", label: "Skift papir layout", icon: "layout/table-rows.svg" },
 ];
 
 function MenuAction({ action, onSelect }) {
@@ -27,12 +27,11 @@ function MenuAction({ action, onSelect }) {
   );
 }
 
-export default function MoreMenuPanel({ onSelect, backgroundColor }) {
+export default function MoreMenuPanel({ onSelect }) {
   return (
     <section
       className={`${styles.panel} ${styles.morePanel}`}
       aria-label="Flere notemuligheder"
-      style={{ backgroundColor }}
     >
       {actions.map((action) => (
         <MenuAction key={action.id} action={action} onSelect={onSelect} />
