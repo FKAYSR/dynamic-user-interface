@@ -201,7 +201,7 @@ export default function NotePage({ initialNote = null }) {
       showSaveStatus("Kunne ikke gemme");
       return false;
     }
-  }, [initialNote?.id, title, blocks, noteColor, paperLayout, showSaveStatus]);
+  }, [initialNote, title, blocks, noteColor, paperLayout, showSaveStatus]);
 
   useEffect(() => {
     if (!initialNote?.id) return;

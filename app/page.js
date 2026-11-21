@@ -2,6 +2,7 @@ import styles from "./page.module.css";
 import Seachbar from "@/components/note/Seachbar";
 import NoteGrid from "@/components/note/NoteGrid";
 import Image from "next/image";
+import AddNoteButton from "@/components/note/AddNoteButton";
 import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import HomeSidePanel from "@/components/navigation/HomeSidePanel";
