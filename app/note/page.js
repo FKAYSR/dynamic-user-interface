@@ -12,6 +12,7 @@ import MoreMenuPanel from "../../components/note/MoreMenuPanel";
 import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
 import LabelPanel from "../../components/note/LabelPanel";
 import noteColors from "../../components/note/noteColors";
+import { getNoteBlocks } from "../../components/note/noteContent";
 
 function decodeInitialContent(content) {
   if (!content) {
@@ -153,7 +154,10 @@ export default function NotePage({ initialNote = null }) {
       : "var(--baggrund)",
   );
   const nextBlockId = useRef(
-    decodeInitialContent(initialNote?.content).length,
+    getNoteBlocks(initialNote?.content).reduce(
+      (highestId, block) => Math.max(highestId, Number(block.id) || 0),
+      0,
+    ),
   );
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
