@@ -7,6 +7,8 @@ import TypographyPanel from "../../components/note/TypographyPanel";
 import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
 import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
+import MoreMenuPanel from "../../components/note/MoreMenuPanel";
+import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -69,6 +71,7 @@ export default function NotePage() {
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
   const [noteColor, setNoteColor] = useState("var(--colors-sticky-notes-standard)");
+  const [paperLayout, setPaperLayout] = useState("blank");
   const nextBlockId = useRef(1);
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
@@ -212,6 +215,23 @@ export default function NotePage() {
     setActivePanel(null);
   }
 
+  function deleteNote() {
+    setTitle("");
+    setBlocks([{ id: 1, type: "paragraph", text: "" }]);
+    setNoteColor("var(--colors-sticky-notes-standard)");
+    setPaperLayout("blank");
+    setActiveBlockId(1);
+    setFocusedBlockId(null);
+    nextBlockId.current = 1;
+    closePanel();
+  }
+
+  function selectMoreAction(action) {
+    if (action === "delete") deleteNote();
+    else if (action === "label") closePanel();
+    else if (action === "paper") setActivePanel("paper");
+  }
+
   const currentBlock = blocks.find((block) => block.id === activeBlockId);
   const activeFormat = {
     h1: currentBlock?.heading === "h1",
@@ -248,7 +268,10 @@ export default function NotePage() {
                 onBlur={() => setTitleFocused(false)}
               />
             </h2>
-            <div className={styles.bodyEditor} aria-label="Notens brødtekst">
+            <div
+              className={`${styles.bodyEditor} ${paperLayout === "lined" ? styles.linedBody : ""}`}
+              aria-label="Notens brødtekst"
+            >
               {blocks.map((block, index) => (
                 <div className={styles.blockRow} key={block.id}>
                   {block.type === "checklist" && (
@@ -307,7 +330,11 @@ export default function NotePage() {
           </section>
         </div>
 
-        <footer className={styles.bottomBar} aria-label="Noteværktøjer">
+        <footer
+          className={styles.bottomBar}
+          aria-label="Noteværktøjer"
+          style={{ backgroundColor: noteColor }}
+        >
           <div className={styles.editingActions}>
             {editingActions.map(({ panel, command, ...action }) => (
               <IconButton
@@ -318,7 +345,12 @@ export default function NotePage() {
               />
             ))}
           </div>
-          <IconButton label="Flere muligheder" icon="more-vert.svg" />
+          <IconButton
+            label="Flere muligheder"
+            icon="more-vert.svg"
+            onClick={() => togglePanel("more")}
+            expanded={activePanel === "more"}
+          />
         </footer>
       </div>
 
@@ -335,6 +367,21 @@ export default function NotePage() {
           {activePanel === "items" && <NoteAddItemsPanel />}
           {activePanel === "colors" && (
             <ColorPickerPanel selectedColor={noteColor} onSelectColor={setNoteColor} />
+          )}
+          {activePanel === "more" && (
+            <MoreMenuPanel
+              onSelect={selectMoreAction}
+              backgroundColor={noteColor}
+            />
+          )}
+          {activePanel === "paper" && (
+            <PaperLayoutPanel
+              selectedLayout={paperLayout}
+              onSelectLayout={(layout) => {
+                setPaperLayout(layout);
+                closePanel();
+              }}
+            />
           )}
         </>
       )}

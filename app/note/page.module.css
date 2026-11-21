@@ -1,12 +1,11 @@
 .screen {
   width: 100%;
-  max-width: 412px;
   min-height: 100dvh;
-  margin: 0 auto;
-  padding: 0 16px 16px;
+  margin: 0;
+  padding: 0 16px;
   display: flex;
   flex-direction: column;
-  background: var(--colors-neutral-100);
+  background: var(--colors-sticky-notes-standard);
   color: var(--colors-text);
 }
 
@@ -75,7 +74,7 @@
 
 .noteLayout {
   flex: 1;
-  min-height: calc(100dvh - 50px);
+  min-height: 100dvh;
   padding-top: 16px;
   display: flex;
   flex-direction: column;
@@ -83,12 +82,16 @@
 }
 
 .topSection {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
 .editor {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -205,9 +208,35 @@
 }
 
 .bodyEditor {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
+}
+
+.linedBody {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    color-mix(in srgb, var(--colors-neutral-500) 55%, transparent) 32px,
+    transparent 33px
+  );
+  background-position: left top;
+  background-size: 100% 32px;
+  background-repeat: repeat;
+}
+
+.bottomBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  height: 72px;
+  flex: 0 0 72px;
+  width: calc(100% + 32px);
+  margin-left: -16px;
+  padding: 8px 16px;
 }
 
 .blockRow {
@@ -219,12 +248,14 @@
 
 .blockInput {
   min-width: 0;
-  min-height: 40px;
+  min-height: 32px;
+  height: 32px;
+  padding: 0;
   resize: none;
   overflow: hidden;
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 32px;
   letter-spacing: -0.48px;
   caret-color: var(--colors-neutral-800);
 }
@@ -260,9 +291,10 @@
 }
 
 .checklistText {
-  min-height: 24px;
+  min-height: 32px;
+  height: 32px;
   padding: 0;
-  line-height: 24px;
+  line-height: 32px;
 }
 
 .completedText {
@@ -289,7 +321,12 @@
   background: transparent;
 }
 
+
 @media (max-width: 360px) {
   .screen { padding-right: 12px; padding-left: 12px; }
   .topActions, .editingActions { gap: 2px; }
+  .bottomBar {
+    width: calc(100% + 24px);
+    margin-left: -12px;
+  }
 }

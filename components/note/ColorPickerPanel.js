@@ -19,7 +19,6 @@ export default function ColorPickerPanel({ selectedColor, onSelectColor }) {
     <section
       className={`${styles.panel} ${styles.colorPanel}`}
       aria-label="Farver"
-      style={{ backgroundColor: selectedColor }}
     >
       <h2>Farver</h2>
       <div className={styles.colorOptions}>
