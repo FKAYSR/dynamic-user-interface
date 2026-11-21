@@ -44,6 +44,7 @@
 
   --background: var(--colors-background);
   --foreground: var(--colors-text);
+  --baggrund: var(--colors-sticky-notes-standard);
 }
 
 @media (max-width: 768px) {

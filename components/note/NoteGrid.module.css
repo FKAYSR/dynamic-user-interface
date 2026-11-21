@@ -1,7 +1,13 @@
 .grid {
-  display: grid;
+  display: block;
   width: 100%;
-  grid-template-columns: repeat(auto-fill, var(--sizing-note-card-width, 13.5rem));
-  justify-content: start;
-  gap: 1rem;
+  column-count: 2;
+  column-gap: 0.5rem;
+}
+
+.grid > * {
+  width: 100%;
+  margin: 0 0 0.5rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }

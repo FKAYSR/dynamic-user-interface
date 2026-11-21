@@ -1,5 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { getCurrentUser } from "@/lib/supabase/server";
+
+export const instant = false;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,10 +19,15 @@ export const metadata = {
   description: "App lavet i et skole eksamens projekt",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const user = await getCurrentUser();
+  const defaultNoteColor =
+    user?.user_metadata?.default_note_color_value ||
+    "var(--colors-sticky-notes-standard)";
+
   return (
     <html lang="da" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body style={{ "--baggrund": defaultNoteColor }}>{children}</body>
     </html>
   );
 }
