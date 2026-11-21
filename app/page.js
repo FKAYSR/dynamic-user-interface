@@ -4,6 +4,7 @@ import NoteGrid from "@/components/note/NoteGrid";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import AddNoteButton from "@/components/note/AddNoteButton";
 
 export const instant = false;
 
@@ -54,6 +55,7 @@ export default async function Home() {
       <main className={styles.main}>
         <NoteGrid notes={noteCards} />
       </main>
+      <AddNoteButton />
     </div>
   );
 }
