@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import Link from "next/link";
@@ -11,6 +11,79 @@ import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
 import MoreMenuPanel from "../../components/note/MoreMenuPanel";
 import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
 import noteColors from "../../components/note/noteColors";
+
+function decodeInitialContent(content) {
+  if (!content) {
+    return [{ id: 1, type: "paragraph", text: "" }];
+  }
+
+  if (Array.isArray(content) && content.length > 0) {
+    return content.map((block, index) => {
+      const text = typeof block.text === "string" ? block.text : "";
+      const legacyChecklist = text.match(/^-\s*\[([ xX])\]\s*(.*)$/);
+      if (legacyChecklist) {
+        return {
+          id: index + 1,
+          type: "checklist",
+          text: legacyChecklist[2],
+          checked: legacyChecklist[1].toLowerCase() === "x",
+        };
+      }
+
+      return {
+        id: index + 1,
+        type: "checked" in block ? "checklist" : "paragraph",
+        text,
+        checked: Boolean(block.checked),
+      };
+    });
+  }
+
+  if (typeof content === "string") {
+    if (content.startsWith("[")) {
+      try {
+        const blocks = JSON.parse(content);
+        if (Array.isArray(blocks) && blocks.length > 0) {
+          return blocks.map((block, index) => ({
+            id: index + 1,
+            type: "checked" in block ? "checklist" : "paragraph",
+            text: typeof block.text === "string" ? block.text : "",
+            checked: Boolean(block.checked),
+          }));
+        }
+      } catch {
+      }
+    }
+
+    return content
+      .split("\n")
+      .filter((text, index, lines) => text.length > 0 || lines.length === 1)
+      .map((text, index) => ({
+        id: index + 1,
+        type: "paragraph",
+        text,
+        checked: false,
+      }));
+  }
+
+  return [{ id: 1, type: "paragraph", text: "", checked: false }];
+}
+
+function encodeContent(blocks) {
+  return blocks.map((block) => ({
+    text: block.text,
+    ...(block.type === "checklist" ? { checked: Boolean(block.checked) } : {}),
+  }));
+}
+
+function getNoteType(blocks) {
+  const hasText = blocks.some((block) => block.type === "paragraph");
+  const hasChecklist = blocks.some((block) => block.type === "checklist");
+
+  if (hasText && hasChecklist) return "mixed";
+  if (hasChecklist) return "checklist";
+  return "text";
+}
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -71,18 +144,14 @@ export default function NotePage({ initialNote = null }) {
   const [title, setTitle] = useState(initialNote?.title ?? "");
   const [titleFocused, setTitleFocused] = useState(false);
   const [blocks, setBlocks] = useState(() =>
-    initialNote?.content
-      ? initialNote.content
-          .split("\n")
-          .filter((text, index, lines) => text.length > 0 || lines.length === 1)
-          .map((text, index) => ({ id: index + 1, type: "paragraph", text }))
-      : [{ id: 1, type: "paragraph", text: "" }],
+    decodeInitialContent(initialNote?.content),
   );
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
   const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
   const [saveStatus, setSaveStatus] = useState("");
+  const saveStatusTimeout = useRef(null);
   const [noteColor, setNoteColor] = useState(
     initialNote?.color
       ? (noteColors.find((color) => color.id === initialNote.color)?.value
@@ -90,17 +159,31 @@ export default function NotePage({ initialNote = null }) {
         ?? "var(--baggrund)")
       : "var(--baggrund)",
   );
-  const nextBlockId = useRef(initialNote?.content?.split("\n").length ?? 1);
+  const nextBlockId = useRef(
+    decodeInitialContent(initialNote?.content).length,
+  );
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
+
+  const showSaveStatus = useCallback((status) => {
+    setSaveStatus(status);
+    if (saveStatusTimeout.current) {
+      window.clearTimeout(saveStatusTimeout.current);
+    }
+    if (status === "Gemt" || status === "Kunne ikke gemme") {
+      saveStatusTimeout.current = window.setTimeout(() => {
+        setSaveStatus("");
+      }, 2000);
+    }
+  }, []);
 
   async function saveNote() {
     if (!initialNote?.id) return false;
 
     const matchingColor = noteColors.find((color) => color.value === noteColor);
-    const content = blocks.map((block) => block.text).join("\n");
+    const content = encodeContent(blocks);
 
-    setSaveStatus("Gemmer...");
+    showSaveStatus("Gemmer...");
     try {
       const response = await fetch(`/api/notes/${initialNote.id}`, {
         method: "PATCH",
@@ -110,14 +193,15 @@ export default function NotePage({ initialNote = null }) {
           content,
           color: matchingColor?.id ?? "standard",
           paper: paperLayout,
+          type: getNoteType(blocks),
         }),
       });
 
       if (!response.ok) throw new Error("Kunne ikke gemme noten.");
-      setSaveStatus("Gemt");
+      showSaveStatus("Gemt");
       return true;
     } catch {
-      setSaveStatus("Kunne ikke gemme");
+      showSaveStatus("Kunne ikke gemme");
       return false;
     }
   }
@@ -127,9 +211,9 @@ export default function NotePage({ initialNote = null }) {
 
     const timeoutId = window.setTimeout(() => {
       const matchingColor = noteColors.find((color) => color.value === noteColor);
-      const content = blocks.map((block) => block.text).join("\n");
+      const content = encodeContent(blocks);
 
-      setSaveStatus("Gemmer...");
+      showSaveStatus("Gemmer...");
       fetch(`/api/notes/${initialNote.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -138,14 +222,15 @@ export default function NotePage({ initialNote = null }) {
           content,
           color: matchingColor?.id ?? "standard",
           paper: paperLayout,
+          type: getNoteType(blocks),
         }),
       }).then((response) => {
-        setSaveStatus(response.ok ? "Gemt" : "Kunne ikke gemme");
-      }).catch(() => setSaveStatus("Kunne ikke gemme"));
+        showSaveStatus(response.ok ? "Gemt" : "Kunne ikke gemme");
+      }).catch(() => showSaveStatus("Kunne ikke gemme"));
     }, 600);
 
     return () => window.clearTimeout(timeoutId);
-  }, [initialNote?.id, title, blocks, noteColor, paperLayout]);
+  }, [initialNote?.id, title, blocks, noteColor, paperLayout, showSaveStatus]);
 
   function selectNoteColor(color) {
     setNoteColor(color);

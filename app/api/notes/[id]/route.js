@@ -17,9 +17,10 @@ export async function PATCH(request, { params }) {
   if (
     typeof id !== "string"
     || typeof body?.title !== "string"
-    || typeof body?.content !== "string"
+    || !Array.isArray(body?.content)
     || !validColor
     || !["blank", "lined"].includes(body?.paper)
+    || !["text", "checklist", "mixed"].includes(body?.type)
   ) {
     return NextResponse.json({ error: "Invalid note data" }, { status: 400 });
   }
@@ -32,6 +33,7 @@ export async function PATCH(request, { params }) {
       content: body.content,
       color: body.color,
       paper: body.paper,
+      type: body.type,
     })
     .eq("id", id)
     .eq("user_id", user.id)
