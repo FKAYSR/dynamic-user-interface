@@ -1,0 +1,200 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  background: var(--colors-neutral-50);
+  font-family: var(--typography-font-family-tekst);
+}
+
+.card {
+  width: min(360px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 48px 16px 24px;
+  border: 1px solid var(--colors-neutral-400);
+  border-radius: 32px;
+  background: var(--colors-background);
+  overflow: hidden;
+}
+
+.topContent,
+.heading,
+.form,
+.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.topContent {
+  gap: 16px;
+}
+
+.heading {
+  gap: 4px;
+}
+
+.heading h1 {
+  color: var(--colors-text);
+  font-size: var(--typography-sizes-h2);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.heading p,
+.field label,
+.remember,
+.switchAuth,
+.divider p {
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.heading p {
+  color: var(--colors-neutral-600);
+}
+
+.form {
+  gap: 16px;
+}
+
+.field {
+  gap: 4px;
+}
+
+.field label {
+  color: var(--colors-neutral-500);
+}
+
+.field input {
+  width: 100%;
+  height: 48px;
+  padding: 0 20px;
+  border: 0.5px solid var(--colors-neutral-400);
+  border-radius: var(--s-border-radius);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.field input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.field input:focus {
+  border-color: var(--colors-marked);
+  box-shadow: 0 0 0 2px rgba(0, 103, 140, 0.12);
+}
+
+.remember {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--colors-neutral-600);
+}
+
+.remember input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--colors-neutral-800);
+}
+
+.primaryButton {
+  width: 100%;
+  height: 48px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--full-circle);
+  background: var(--colors-sticky-notes-gul);
+  color: #000;
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  color: var(--colors-neutral-400);
+}
+
+.divider span {
+  height: 1px;
+  flex: 1;
+  background: var(--colors-neutral-200);
+}
+
+.socialButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.socialButton {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0.5px solid var(--colors-neutral-400);
+  border-radius: var(--full-circle);
+  background: var(--colors-background);
+  color: #000;
+  font-size: 14px;
+  letter-spacing: -0.03em;
+}
+
+.googleIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.facebookIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #1877f2;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.switchAuth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 48px;
+  color: var(--colors-neutral-500);
+  white-space: nowrap;
+}
+
+.switchAuth a {
+  color: var(--colors-marked);
+}
+
+.formError {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: hsl(0 70% 95%);
+  color: hsl(0 60% 35%);
+  font-size: 13px;
+  line-height: 1.3;
+}
