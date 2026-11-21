@@ -413,7 +413,7 @@ export default function NotePage({ initialNote = null }) {
     <main className={styles.screen} style={{ backgroundColor: noteColor }}>
       <div className={styles.noteLayout}>
         <div className={styles.topSection}>
-          <nav className={styles.noteNav} aria-label="Notehandling">
+          <nav className={styles.noteNav} aria-label="Notehandling" style={{ backgroundColor: noteColor }}>
             <IconControl
               href="/"
               label="Tilbage til forsiden"

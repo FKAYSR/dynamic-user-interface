@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./ToolPanel.module.css";
 
 const icons = {
@@ -84,12 +84,6 @@ export default function LabelPanel({ noteId, onClose }) {
   }
 
   const filteredLabels = labels.filter((label) => label.name.toLowerCase().includes(query.toLowerCase()));
-  const filteredCatalog = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return catalog;
-    return catalog.map((group) => ({ ...group, items: group.items.filter((item) => item.name.toLowerCase().includes(term)) }))
-      .filter((group) => group.items.length);
-  }, [query]);
   const iconCount = catalog.reduce((count, group) => count + group.items.length, 0);
 
   return (
@@ -107,19 +101,24 @@ export default function LabelPanel({ noteId, onClose }) {
         {query && <button className={styles.labelClear} type="button" aria-label="Ryd søgning" onClick={() => setQuery("")}>×</button>}
         {!query && <span className={styles.labelSearchIcon} aria-hidden="true" />}
       </div>
+      {query.trim() && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
+        <button className={styles.labelCreate} type="button" onClick={submitQuery}>
+          <img src="/icons/plus.svg" alt="" />
+          <span>Opret <strong>"{query.trim()}"</strong></span>
+        </button>
+      )}
       {iconPickerOpen && <div className={styles.iconPicker} role="dialog" aria-label="Alle ikoner">
         <header className={styles.iconPickerHeader}>
           <div><h3>Alle ikoner</h3><span>{iconCount} ikoner</span></div>
           <button type="button" aria-label="Luk ikonoversigt" onClick={() => setIconPickerOpen(false)}>×</button>
         </header>
         <div className={styles.iconPickerList}>
-          {filteredCatalog.map((group) => <section className={styles.iconCategory} key={group.category}>
+          {catalog.map((group) => <section className={styles.iconCategory} key={group.category}>
             <h4>{group.category}</h4>
             <div>{group.items.map((item) => <button type="button" key={item.path} aria-label={item.name} aria-pressed={icon === item.path} onClick={() => { setIcon(item.path); setIconPickerOpen(false); }}>
               <img src={`/icons/${item.path}`} alt="" />
             </button>)}</div>
           </section>)}
-          {!filteredCatalog.length && <span className={styles.labelEmpty}>Ingen ikoner matcher søgningen</span>}
         </div>
       </div>}
       <div className={styles.labelList}>
@@ -132,12 +131,6 @@ export default function LabelPanel({ noteId, onClose }) {
           </button>;
         }) : query.trim() ? null : <span className={styles.labelEmpty}>Ingen etiketter fundet</span>}
       </div>
-      {query.trim() && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
-        <button className={styles.labelCreate} type="button" onClick={submitQuery}>
-          <img src="/icons/plus.svg" alt="" />
-          <span>Opret <strong>"{query.trim()}"</strong></span>
-        </button>
-      )}
     </section>
   );
 }
