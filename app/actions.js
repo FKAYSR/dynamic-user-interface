@@ -18,7 +18,7 @@ export async function createNote() {
     .insert({
       user_id: user.id,
       title: "",
-      content: "",
+      content: [],
       color: "standard",
       type: "text",
       pinned: false,
