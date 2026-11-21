@@ -75,7 +75,7 @@
 .noteLayout {
   flex: 1;
   min-height: 100dvh;
-  padding-top: 16px;
+  padding: 16px 0 72px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -84,6 +84,7 @@
 .topSection {
   flex: 1;
   min-height: 0;
+  padding-top: 76px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -97,6 +98,14 @@
   gap: 1rem;
 }
 
+.editorThrowing {
+  position: relative;
+  z-index: 51;
+  overflow: hidden;
+  transform-origin: center;
+  animation: paperCrumple 1350ms cubic-bezier(0.45, 0, 0.8, 0.45) forwards;
+}
+
 .noteNav,
 .topActions,
 .bottomBar,
@@ -106,7 +115,13 @@
 }
 
 .noteNav {
-  position: relative;
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  right: 0;
+  left: 0;
+  min-height: 64px;
+  padding: 8px 16px;
 }
 
 .saveStatus {
@@ -241,13 +256,15 @@
 }
 
 .bottomBar {
-  position: sticky;
+  position: fixed;
+  right: 0;
+  left: 0;
   bottom: 0;
   z-index: 20;
   height: 72px;
   flex: 0 0 72px;
-  width: calc(100% + 32px);
-  margin-left: -16px;
+  width: 100%;
+  margin: 0;
   padding: 8px 16px;
 }
 
@@ -330,15 +347,173 @@
   width: 100%;
   height: 100%;
   border: 0;
+  background: hsl(0 0% 0% / 0.35);
+}
+
+.typographyBackdrop {
   background: transparent;
+}
+
+.deleteAnimation {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px 16px;
+  pointer-events: auto;
+}
+
+.deleteAnimation::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: hsl(0 0% 0% / 0.28);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.deletePrompt {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 12px;
+  max-width: min(300px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--colors-neutral-900);
+  color: var(--colors-neutral-50);
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 4px 16px hsl(0 0% 0% / 0.18);
+  animation: deletePopup 260ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.deleteActions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.deleteActions button {
+  min-width: 112px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--colors-neutral-400);
+  border-radius: var(--full-circle);
+  background: var(--colors-neutral-50);
+  color: var(--colors-text);
+  font: 500 14px/20px var(--typography-font-family-tekst, Inter, Arial, sans-serif);
+  cursor: pointer;
+}
+
+.deleteActions button:last-child {
+  border-color: var(--colors-neutral-900);
+  background: var(--colors-neutral-900);
+  color: var(--colors-neutral-50);
+}
+
+.trashCan {
+  position: relative;
+  z-index: 1;
+  width: 224px;
+  height: 224px;
+  display: grid;
+  place-items: center;
+  animation: trashPop 620ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.trashCan img {
+  display: block;
+  width: 216px;
+  height: 216px;
+}
+
+.deleteError {
+  position: fixed;
+  z-index: 51;
+  right: 16px;
+  bottom: 24px;
+  left: 96px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--colors-neutral-900);
+  color: var(--colors-neutral-50);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@keyframes paperCrumple {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0);
+    clip-path: inset(0 round 0);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+  }
+  22% {
+    transform: translate(0, 0) scale(0.82) rotate(5deg);
+    clip-path: inset(0 round 8px);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 28px hsl(0 0% 0% / 0.2);
+  }
+  48% {
+    transform: translate(0, 0) scale(0.38) rotate(210deg);
+    clip-path: circle(48% at 50% 50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0 22%, #e4e4e4 58%, #a8a8a8 100%);
+    box-shadow: 0 10px 20px hsl(0 0% 0% / 0.24);
+  }
+  72% {
+    transform: translate(0, 18vh) scale(0.16) rotate(560deg);
+    clip-path: circle(48% at 50% 50%);
+    border-radius: 50%;
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(0, 38vh) scale(0.025) rotate(1000deg);
+    clip-path: circle(48% at 50% 50%);
+    border-radius: 50%;
+    opacity: 0;
+  }
+}
+
+@keyframes trashPop {
+  0% { transform: translateY(110%) scale(0.65); opacity: 0; }
+  62% { transform: translateY(-12px) scale(1.08); opacity: 1; }
+  82% { transform: translateY(4px) scale(0.97); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes deletePopup {
+  from { transform: translateY(10px) scale(0.92); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 
 @media (max-width: 360px) {
   .screen { padding-right: 12px; padding-left: 12px; }
+  .noteNav { padding-right: 12px; padding-left: 12px; }
   .topActions, .editingActions { gap: 2px; }
+  .deleteError { right: 12px; }
+  .deleteActions { gap: 8px; }
+  .deleteActions button { min-width: 104px; }
   .bottomBar {
-    width: calc(100% + 24px);
-    margin-left: -12px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editorThrowing,
+  .trashCan,
+  .deletePrompt {
+    animation-duration: 1ms;
   }
 }
