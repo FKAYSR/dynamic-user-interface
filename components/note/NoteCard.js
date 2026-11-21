@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./NoteCard.module.css";
 import noteColors from "./noteColors";
+import { getNoteText } from "./noteContent";
 
 export default function NoteCard({ note }) {
-  const title = typeof note.title === "string" ? note.title : "";
-  const content = typeof note.content === "string" ? note.content : "";
+  const title = getNoteText(note.title);
+  const content = getNoteText(note.content);
   const activeColor =
     noteColors.find((color) => color.id === note.color)
     ?? noteColors.find((color) => color.value === note.color)
@@ -23,8 +24,8 @@ export default function NoteCard({ note }) {
       {note.imageUrl && (
         <div className={styles.image}>
           <Image
-            src={note.imageUrl}
-            alt={note.imageAlt ?? title ?? "Billede i note"}
+              src={note.imageUrl}
+              alt={note.imageAlt ?? title ?? "Billede i note"}
             fill
             sizes="(max-width: 768px) 194px, 216px"
             unoptimized

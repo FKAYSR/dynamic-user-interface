@@ -23,7 +23,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="da" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body style={{ "--baggrund": defaultNoteColor }}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

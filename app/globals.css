@@ -17,8 +17,8 @@
 
   --colors-sticky-notes-standard: var(--colors-neutral-100);
   --colors-sticky-notes-lyserød: hsl(342 91% 83%);
-  --colors-sticky-notes-fersken: hsl(22 92% 77%);
-  --colors-sticky-notes-gul: hsl(38 70% 70%);
+  --colors-sticky-notes-fersken: var(--baggrund);
+  --colors-sticky-notes-gul: var(--baggrund);
   --colors-sticky-notes-grøn: hsl(122 42% 74%);
   --colors-sticky-notes-turkis: hsl(173 58% 66%);
   --colors-sticky-notes-støvblå: hsl(195 62% 74%);
