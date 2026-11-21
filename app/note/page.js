@@ -1,14 +1,90 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import Link from "next/link";
 import TypographyPanel from "../../components/note/TypographyPanel";
 import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
 import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
+import MoreMenuPanel from "../../components/note/MoreMenuPanel";
+import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
 import noteColors from "../../components/note/noteColors";
 import { getNoteBlocks } from "../../components/note/noteContent";
+
+function decodeInitialContent(content) {
+  if (!content) {
+    return [{ id: 1, type: "paragraph", text: "" }];
+  }
+
+  if (Array.isArray(content) && content.length > 0) {
+    return content.map((block, index) => {
+      const text = typeof block.text === "string" ? block.text : "";
+      const legacyChecklist = text.match(/^-\s*\[([ xX])\]\s*(.*)$/);
+      if (legacyChecklist) {
+        return {
+          id: index + 1,
+          type: "checklist",
+          text: legacyChecklist[2],
+          checked: legacyChecklist[1].toLowerCase() === "x",
+        };
+      }
+
+      return {
+        id: index + 1,
+        type: "checked" in block ? "checklist" : "paragraph",
+        text,
+        checked: Boolean(block.checked),
+      };
+    });
+  }
+
+  if (typeof content === "string") {
+    if (content.startsWith("[")) {
+      try {
+        const blocks = JSON.parse(content);
+        if (Array.isArray(blocks) && blocks.length > 0) {
+          return blocks.map((block, index) => ({
+            id: index + 1,
+            type: "checked" in block ? "checklist" : "paragraph",
+            text: typeof block.text === "string" ? block.text : "",
+            checked: Boolean(block.checked),
+          }));
+        }
+      } catch {
+      }
+    }
+
+    return content
+      .split("\n")
+      .filter((text, index, lines) => text.length > 0 || lines.length === 1)
+      .map((text, index) => ({
+        id: index + 1,
+        type: "paragraph",
+        text,
+        checked: false,
+      }));
+  }
+
+  return [{ id: 1, type: "paragraph", text: "", checked: false }];
+}
+
+function encodeContent(blocks) {
+  return blocks.map((block) => ({
+    text: block.text,
+    ...(block.type === "checklist" ? { checked: Boolean(block.checked) } : {}),
+  }));
+}
+
+function getNoteType(blocks) {
+  const hasText = blocks.some((block) => block.type === "paragraph");
+  const hasChecklist = blocks.some((block) => block.type === "checklist");
+
+  if (hasText && hasChecklist) return "mixed";
+  if (hasChecklist) return "checklist";
+  return "text";
+}
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -44,7 +120,7 @@ function IconButton({ label, icon, className = "", onClick, expanded }) {
   );
 }
 
-function IconLink({ href, label, icon, className = "" }) {
+function IconLink({ href, label, icon, className = "", onClick }) {
   const { ripple, triggerRipple, finishRipple } = useRipple();
 
   return (
@@ -55,6 +131,7 @@ function IconLink({ href, label, icon, className = "" }) {
       onPointerDown={triggerRipple}
       onClick={(event) => {
         if (event.detail === 0) triggerRipple(event);
+        onClick?.(event);
       }}
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
@@ -64,12 +141,18 @@ function IconLink({ href, label, icon, className = "" }) {
 }
 
 export default function NotePage({ initialNote = null }) {
+  const router = useRouter();
   const [title, setTitle] = useState(initialNote?.title ?? "");
   const [titleFocused, setTitleFocused] = useState(false);
-  const [blocks, setBlocks] = useState(() => getNoteBlocks(initialNote?.content));
+  const [blocks, setBlocks] = useState(() =>
+    decodeInitialContent(initialNote?.content),
+  );
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
+  const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
+  const [saveStatus, setSaveStatus] = useState("");
+  const saveStatusTimeout = useRef(null);
   const [noteColor, setNoteColor] = useState(
     initialNote?.color
       ? (noteColors.find((color) => color.id === initialNote.color)?.value
@@ -86,16 +169,76 @@ export default function NotePage({ initialNote = null }) {
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
 
-  async function selectNoteColor(color) {
+  const showSaveStatus = useCallback((status) => {
+    setSaveStatus(status);
+    if (saveStatusTimeout.current) {
+      window.clearTimeout(saveStatusTimeout.current);
+    }
+    if (status === "Gemt" || status === "Kunne ikke gemme") {
+      saveStatusTimeout.current = window.setTimeout(() => {
+        setSaveStatus("");
+      }, 2000);
+    }
+  }, []);
+
+  async function saveNote() {
+    if (!initialNote?.id) return false;
+
+    const matchingColor = noteColors.find((color) => color.value === noteColor);
+    const content = encodeContent(blocks);
+
+    showSaveStatus("Gemmer...");
+    try {
+      const response = await fetch(`/api/notes/${initialNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          color: matchingColor?.id ?? "standard",
+          paper: paperLayout,
+          type: getNoteType(blocks),
+        }),
+      });
+
+      if (!response.ok) throw new Error("Kunne ikke gemme noten.");
+      showSaveStatus("Gemt");
+      return true;
+    } catch {
+      showSaveStatus("Kunne ikke gemme");
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    if (!initialNote?.id) return;
+
+    const timeoutId = window.setTimeout(() => {
+      const matchingColor = noteColors.find((color) => color.value === noteColor);
+      const content = encodeContent(blocks);
+
+      showSaveStatus("Gemmer...");
+      fetch(`/api/notes/${initialNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          color: matchingColor?.id ?? "standard",
+          paper: paperLayout,
+          type: getNoteType(blocks),
+        }),
+      }).then((response) => {
+        showSaveStatus(response.ok ? "Gemt" : "Kunne ikke gemme");
+      }).catch(() => showSaveStatus("Kunne ikke gemme"));
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [initialNote?.id, title, blocks, noteColor, paperLayout, showSaveStatus]);
+
+  function selectNoteColor(color) {
     setNoteColor(color);
     document.documentElement.style.setProperty("--baggrund", color);
-    window.localStorage.setItem("defaultNoteColor", color);
-
-    await fetch("/api/preferences", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ defaultNoteColorValue: color }),
-    });
   }
 
   function createBlock(type, text = "") {
@@ -237,6 +380,23 @@ export default function NotePage({ initialNote = null }) {
     setActivePanel(null);
   }
 
+  function deleteNote() {
+    setTitle("");
+    setBlocks([{ id: 1, type: "paragraph", text: "" }]);
+    setNoteColor("var(--colors-sticky-notes-standard)");
+    setPaperLayout("blank");
+    setActiveBlockId(1);
+    setFocusedBlockId(null);
+    nextBlockId.current = 1;
+    closePanel();
+  }
+
+  function selectMoreAction(action) {
+    if (action === "delete") deleteNote();
+    else if (action === "label") closePanel();
+    else if (action === "paper") setActivePanel("paper");
+  }
+
   const currentBlock = blocks.find((block) => block.id === activeBlockId);
   const activeFormat = {
     h1: currentBlock?.heading === "h1",
@@ -252,7 +412,20 @@ export default function NotePage({ initialNote = null }) {
       <div className={styles.noteLayout}>
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling">
-            <IconLink href="/" label="Tilbage til forsiden" icon="arrow-left.svg" className={styles.plainButton} />
+            <IconLink
+              href="/"
+              label="Tilbage til forsiden"
+              icon="arrow-left.svg"
+              className={styles.plainButton}
+              onClick={async (event) => {
+                event.preventDefault();
+                await saveNote();
+                router.push("/");
+              }}
+            />
+            <span className={styles.saveStatus} role="status" aria-live="polite">
+              {saveStatus}
+            </span>
             <div className={styles.topActions}>
               {topActions.map((action) => (
                 <IconButton key={action.icon} {...action} />
@@ -273,7 +446,10 @@ export default function NotePage({ initialNote = null }) {
                 onBlur={() => setTitleFocused(false)}
               />
             </h2>
-            <div className={styles.bodyEditor} aria-label="Notens brødtekst">
+            <div
+              className={`${styles.bodyEditor} ${paperLayout === "lined" ? styles.linedBody : ""}`}
+              aria-label="Notens brødtekst"
+            >
               {blocks.map((block, index) => (
                 <div className={styles.blockRow} key={block.id}>
                   {block.type === "checklist" && (
@@ -332,7 +508,11 @@ export default function NotePage({ initialNote = null }) {
           </section>
         </div>
 
-        <footer className={styles.bottomBar} aria-label="Noteværktøjer">
+        <footer
+          className={styles.bottomBar}
+          aria-label="Noteværktøjer"
+          style={{ backgroundColor: noteColor }}
+        >
           <div className={styles.editingActions}>
             {editingActions.map(({ panel, command, ...action }) => (
               <IconButton
@@ -343,7 +523,12 @@ export default function NotePage({ initialNote = null }) {
               />
             ))}
           </div>
-          <IconButton label="Flere muligheder" icon="more-vert.svg" />
+          <IconButton
+            label="Flere muligheder"
+            icon="more-vert.svg"
+            onClick={() => togglePanel("more")}
+            expanded={activePanel === "more"}
+          />
         </footer>
       </div>
 
@@ -360,6 +545,21 @@ export default function NotePage({ initialNote = null }) {
           {activePanel === "items" && <NoteAddItemsPanel />}
           {activePanel === "colors" && (
             <ColorPickerPanel selectedColor={noteColor} onSelectColor={selectNoteColor} />
+          )}
+          {activePanel === "more" && (
+            <MoreMenuPanel
+              onSelect={selectMoreAction}
+              backgroundColor={noteColor}
+            />
+          )}
+          {activePanel === "paper" && (
+            <PaperLayoutPanel
+              selectedLayout={paperLayout}
+              onSelectLayout={(layout) => {
+                setPaperLayout(layout);
+                closePanel();
+              }}
+            />
           )}
         </>
       )}

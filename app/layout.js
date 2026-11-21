@@ -18,7 +18,9 @@ export const metadata = {
   description: "App lavet i et skole eksamens projekt",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const defaultNoteColor = "var(--colors-sticky-notes-standard)";
+
   return (
     <html lang="da" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>{children}</body>

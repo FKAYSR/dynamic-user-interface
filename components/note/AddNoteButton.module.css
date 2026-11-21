@@ -1,0 +1,58 @@
+.form {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+}
+
+.button {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: hsl(22 92% 77%);
+  box-shadow: 0 0.25rem 0.75rem hsl(0 0% 0% / 0.14);
+  cursor: pointer;
+}
+
+.button:hover {
+  filter: brightness(0.97);
+}
+
+.button:active {
+  transform: scale(0.96);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--colors-marked);
+  outline-offset: 3px;
+}
+
+.plus,
+.plus::before,
+.plus::after {
+  display: block;
+  width: 1.125rem;
+  height: 0.125rem;
+  border-radius: 1rem;
+  background: var(--colors-neutral-800);
+}
+
+.plus {
+  position: relative;
+}
+
+.plus::before,
+.plus::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.plus::before {
+  transform: rotate(90deg);
+}

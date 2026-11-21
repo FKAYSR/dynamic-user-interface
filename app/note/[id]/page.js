@@ -14,7 +14,7 @@ export default async function SpecificNotePage({ params }) {
   const supabase = await createClient();
   const { data: note, error } = await supabase
     .from("notes")
-    .select("id, title, content, color")
+    .select("id, title, content, color, paper, type")
     .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle();

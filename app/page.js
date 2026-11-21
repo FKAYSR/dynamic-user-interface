@@ -8,6 +8,32 @@ import HomeSidePanel from "@/components/navigation/HomeSidePanel";
 
 export const instant = false;
 
+function getNotePreview(content) {
+  if (Array.isArray(content)) {
+    return content
+      .map((block) => (block && typeof block.text === "string"
+        ? block.text.replace(/^-\s*\[[ xX]\]\s*/, "")
+        : ""))
+      .join("\n");
+  }
+
+  if (typeof content !== "string") {
+    if (content && typeof content.text === "string") return content.text;
+    return "";
+  }
+  if (!content.startsWith("[")) return content;
+
+  try {
+    const parsed = JSON.parse(content);
+    if (!Array.isArray(parsed)) return "";
+    return parsed
+      .map((block) => typeof block?.text === "string" ? block.text : "")
+      .join("\n");
+  } catch {
+    return content;
+  }
+}
+
 export default async function Home() {
   const user = await getCurrentUser();
   if (!user) {
@@ -51,7 +77,7 @@ export default async function Home() {
   const noteCards = (notes ?? []).map((note) => ({
     id: note.id,
     title: note.title,
-    content: note.content,
+    content: getNotePreview(note.content),
     color: note.color || "standard",
   }));
 
@@ -68,6 +94,7 @@ export default async function Home() {
       <main className={styles.main}>
         <NoteGrid notes={noteCards} />
       </main>
+      <AddNoteButton />
     </div>
   );
 }
