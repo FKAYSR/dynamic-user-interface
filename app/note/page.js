@@ -78,9 +78,7 @@ export default function NotePage({ initialNote = null }) {
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
-  const [noteColor, setNoteColor] = useState("var(--colors-sticky-notes-standard)");
   const [paperLayout, setPaperLayout] = useState("blank");
-  const nextBlockId = useRef(1);
   const [noteColor, setNoteColor] = useState(
     initialNote?.color
       ? (noteColors.find((color) => color.id === initialNote.color)?.value
