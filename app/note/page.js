@@ -7,6 +7,8 @@ import TypographyPanel from "../../components/note/TypographyPanel";
 import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
 import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
+import MoreMenuPanel from "../../components/note/MoreMenuPanel";
+import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
 import noteColors from "../../components/note/noteColors";
 
 const topActions = [
@@ -76,6 +78,9 @@ export default function NotePage({ initialNote = null }) {
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
+  const [noteColor, setNoteColor] = useState("var(--colors-sticky-notes-standard)");
+  const [paperLayout, setPaperLayout] = useState("blank");
+  const nextBlockId = useRef(1);
   const [noteColor, setNoteColor] = useState(
     initialNote?.color
       ? (noteColors.find((color) => color.id === initialNote.color)?.value
@@ -238,6 +243,23 @@ export default function NotePage({ initialNote = null }) {
     setActivePanel(null);
   }
 
+  function deleteNote() {
+    setTitle("");
+    setBlocks([{ id: 1, type: "paragraph", text: "" }]);
+    setNoteColor("var(--colors-sticky-notes-standard)");
+    setPaperLayout("blank");
+    setActiveBlockId(1);
+    setFocusedBlockId(null);
+    nextBlockId.current = 1;
+    closePanel();
+  }
+
+  function selectMoreAction(action) {
+    if (action === "delete") deleteNote();
+    else if (action === "label") closePanel();
+    else if (action === "paper") setActivePanel("paper");
+  }
+
   const currentBlock = blocks.find((block) => block.id === activeBlockId);
   const activeFormat = {
     h1: currentBlock?.heading === "h1",
@@ -274,7 +296,10 @@ export default function NotePage({ initialNote = null }) {
                 onBlur={() => setTitleFocused(false)}
               />
             </h2>
-            <div className={styles.bodyEditor} aria-label="Notens brødtekst">
+            <div
+              className={`${styles.bodyEditor} ${paperLayout === "lined" ? styles.linedBody : ""}`}
+              aria-label="Notens brødtekst"
+            >
               {blocks.map((block, index) => (
                 <div className={styles.blockRow} key={block.id}>
                   {block.type === "checklist" && (
@@ -333,7 +358,11 @@ export default function NotePage({ initialNote = null }) {
           </section>
         </div>
 
-        <footer className={styles.bottomBar} aria-label="Noteværktøjer">
+        <footer
+          className={styles.bottomBar}
+          aria-label="Noteværktøjer"
+          style={{ backgroundColor: noteColor }}
+        >
           <div className={styles.editingActions}>
             {editingActions.map(({ panel, command, ...action }) => (
               <IconButton
@@ -344,7 +373,12 @@ export default function NotePage({ initialNote = null }) {
               />
             ))}
           </div>
-          <IconButton label="Flere muligheder" icon="more-vert.svg" />
+          <IconButton
+            label="Flere muligheder"
+            icon="more-vert.svg"
+            onClick={() => togglePanel("more")}
+            expanded={activePanel === "more"}
+          />
         </footer>
       </div>
 
@@ -361,6 +395,21 @@ export default function NotePage({ initialNote = null }) {
           {activePanel === "items" && <NoteAddItemsPanel />}
           {activePanel === "colors" && (
             <ColorPickerPanel selectedColor={noteColor} onSelectColor={selectNoteColor} />
+          )}
+          {activePanel === "more" && (
+            <MoreMenuPanel
+              onSelect={selectMoreAction}
+              backgroundColor={noteColor}
+            />
+          )}
+          {activePanel === "paper" && (
+            <PaperLayoutPanel
+              selectedLayout={paperLayout}
+              onSelectLayout={(layout) => {
+                setPaperLayout(layout);
+                closePanel();
+              }}
+            />
           )}
         </>
       )}
