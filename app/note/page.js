@@ -8,6 +8,7 @@ import NoteAddItemsPanel from "../../components/note/NoteAddItemsPanel";
 import ColorPickerPanel from "../../components/note/ColorPickerPanel";
 import RippleEffect, { useRipple } from "../../components/note/RippleEffect";
 import noteColors from "../../components/note/noteColors";
+import { getNoteBlocks } from "../../components/note/noteContent";
 
 const topActions = [
   { label: "Fastgør note", icon: "pin.svg" },
@@ -65,14 +66,7 @@ function IconLink({ href, label, icon, className = "" }) {
 export default function NotePage({ initialNote = null }) {
   const [title, setTitle] = useState(initialNote?.title ?? "");
   const [titleFocused, setTitleFocused] = useState(false);
-  const [blocks, setBlocks] = useState(() =>
-    initialNote?.content
-      ? initialNote.content
-          .split("\n")
-          .filter((text, index, lines) => text.length > 0 || lines.length === 1)
-          .map((text, index) => ({ id: index + 1, type: "paragraph", text }))
-      : [{ id: 1, type: "paragraph", text: "" }],
-  );
+  const [blocks, setBlocks] = useState(() => getNoteBlocks(initialNote?.content));
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
@@ -83,7 +77,12 @@ export default function NotePage({ initialNote = null }) {
         ?? "var(--baggrund)")
       : "var(--baggrund)",
   );
-  const nextBlockId = useRef(initialNote?.content?.split("\n").length ?? 1);
+  const nextBlockId = useRef(
+    getNoteBlocks(initialNote?.content).reduce(
+      (highestId, block) => Math.max(highestId, Number(block.id) || 0),
+      0,
+    ),
+  );
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
 

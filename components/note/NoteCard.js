@@ -4,8 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./NoteCard.module.css";
 import noteColors from "./noteColors";
+import { getNoteText } from "./noteContent";
 
 export default function NoteCard({ note }) {
+  const title = getNoteText(note.title);
+  const content = getNoteText(note.content);
   const activeColor =
     noteColors.find((color) => color.id === note.color)
     ?? noteColors.find((color) => color.value === note.color)
@@ -16,13 +19,13 @@ export default function NoteCard({ note }) {
       href={`/note/${note.id}`}
       className={styles.card}
       style={{ backgroundColor: activeColor.value }}
-      aria-label={note.title ? `Åbn note: ${note.title}` : "Åbn note"}
+      aria-label={title ? `Åbn note: ${title}` : "Åbn note"}
     >
       {note.imageUrl && (
         <div className={styles.image}>
           <Image
-            src={note.imageUrl}
-            alt={note.imageAlt ?? note.title ?? "Billede i note"}
+              src={note.imageUrl}
+              alt={note.imageAlt ?? title ?? "Billede i note"}
             fill
             sizes="(max-width: 768px) 194px, 216px"
             unoptimized
@@ -32,10 +35,10 @@ export default function NoteCard({ note }) {
       )}
 
       <div className={styles.heading}>
-        {note.title && <h2 className={styles.title}>{note.title}</h2>}
+        {title && <h2 className={styles.title}>{title}</h2>}
       </div>
 
-      {note.content && <p className={styles.content}>{note.content}</p>}
+      {content && <p className={styles.content}>{content}</p>}
     </Link>
   );
 }
