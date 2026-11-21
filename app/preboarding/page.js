@@ -1,10 +1,24 @@
 import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import PreboardingFlow from "./PreboardingFlow";
 
 export const instant = false;
 
-async function completePreboarding() {
+async function completePreboarding(formData) {
   "use server";
+
+  const firstName = formData.get("firstName");
+  const defaultColorId = formData.get("defaultColorId");
+  const defaultColorValue = formData.get("defaultColorValue");
+
+  if (
+    typeof firstName !== "string"
+    || firstName.trim().length === 0
+    || typeof defaultColorId !== "string"
+    || typeof defaultColorValue !== "string"
+  ) {
+    redirect("/preboarding?error=true");
+  }
 
   const supabase = await createClient();
   const {
@@ -25,7 +39,13 @@ async function completePreboarding() {
   }
 
   const { error } = await supabase.auth.updateUser({
-    data: { onboarding_complete: true },
+    data: {
+      first_name: firstName.trim(),
+      display_name: firstName.trim(),
+      onboarding_complete: true,
+      default_note_color: defaultColorId,
+      default_note_color_value: defaultColorValue,
+    },
   });
 
   if (error) {
@@ -36,7 +56,7 @@ async function completePreboarding() {
 }
 
 export default async function PreboardingPage({ searchParams }) {
-  const { error: completionError } = await searchParams;
+  const { error: completionError, fromLogin } = await searchParams;
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login");
@@ -47,17 +67,10 @@ export default async function PreboardingPage({ searchParams }) {
   }
 
   return (
-    <main>
-      <h1>Velkommen!</h1>
-      <p>Vi hjælper dig godt i gang. Du kan nu begynde at bruge dine noter.</p>
-      {completionError && (
-        <p role="alert">
-          Preboarding kunne ikke gennemføres. Prøv igen.
-        </p>
-      )}
-      <form action={completePreboarding}>
-        <button type="submit">Fortsæt til dine noter</button>
-      </form>
-    </main>
+    <PreboardingFlow
+      fromLogin={fromLogin === "true"}
+      completionError={Boolean(completionError)}
+      completePreboarding={completePreboarding}
+    />
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import TypographyPanel from "../../components/note/TypographyPanel";
@@ -68,10 +68,31 @@ export default function NotePage() {
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const [activeBlockId, setActiveBlockId] = useState(1);
   const [activePanel, setActivePanel] = useState(null);
-  const [noteColor, setNoteColor] = useState("var(--colors-sticky-notes-standard)");
+  const [noteColor, setNoteColor] = useState("var(--baggrund)");
   const nextBlockId = useRef(1);
   const blockRefs = useRef(new Map());
   const cursor = useRef({ blockId: 1, start: 0, end: 0 });
+
+  useEffect(() => {
+    const savedColor = window.localStorage.getItem("defaultNoteColor");
+    if (!savedColor) {
+      document.documentElement.style.setProperty("--baggrund", noteColor);
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      setNoteColor(savedColor);
+      document.documentElement.style.setProperty("--baggrund", savedColor);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [noteColor]);
+
+  function selectNoteColor(color) {
+    setNoteColor(color);
+    document.documentElement.style.setProperty("--baggrund", color);
+    window.localStorage.setItem("defaultNoteColor", color);
+  }
 
   function createBlock(type, text = "") {
     return { id: ++nextBlockId.current, type, text, checked: false };
@@ -334,7 +355,7 @@ export default function NotePage() {
           )}
           {activePanel === "items" && <NoteAddItemsPanel />}
           {activePanel === "colors" && (
-            <ColorPickerPanel selectedColor={noteColor} onSelectColor={setNoteColor} />
+            <ColorPickerPanel selectedColor={noteColor} onSelectColor={selectNoteColor} />
           )}
         </>
       )}
