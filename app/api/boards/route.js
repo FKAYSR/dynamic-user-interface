@@ -21,7 +21,7 @@ export async function POST(request) {
   const { data, error } = await supabase
     .from("boards")
     .insert({ name, color: matchingColor.value })
-    .select("id, name, color, created_at")
+    .select("id, name, color, created_at, last_accessed_at")
     .single();
 
   if (error) {

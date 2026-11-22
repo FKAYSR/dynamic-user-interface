@@ -1,0 +1,21 @@
+import Image from "next/image";
+import Seachbar from "@/components/note/Seachbar";
+import HomeSidePanel from "./HomeSidePanel";
+import styles from "./HomeHeader.module.css";
+
+export default function HomeHeader({ boards, labels, navigationKey }) {
+  return (
+    <header className={styles.header}>
+      <HomeSidePanel
+        key={navigationKey}
+        boards={boards}
+        labels={labels}
+      />
+      <Seachbar />
+      <Image src="/icons/sort.svg" alt="sorter" width={48} height={48} />
+      <div className={styles.touchArea}>
+        <div className={styles.avatar} />
+      </div>
+    </header>
+  );
+}
