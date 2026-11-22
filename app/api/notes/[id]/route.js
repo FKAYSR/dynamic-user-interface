@@ -12,6 +12,36 @@ export async function PATCH(request, { params }) {
 
   const { id } = await params;
   const body = await request.json();
+  const supabase = await createClient();
+
+  if (body?.action === "archive") {
+    if (typeof id !== "string") {
+      return NextResponse.json({ error: "Invalid note ID" }, { status: 400 });
+    }
+
+    const { data: note, error } = await supabase
+      .from("notes")
+      .update({ archived: true })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      return NextResponse.json({ error: "Could not archive note" }, { status: 500 });
+    }
+    if (!note) {
+      return NextResponse.json({ error: "Note not found" }, { status: 404 });
+    }
+
+    revalidatePath("/");
+    revalidatePath("/archive");
+    revalidatePath(`/note/${id}`);
+
+    return NextResponse.json({ id: note.id });
+  }
+
   const validColor = noteColors.some((color) => color.id === body?.color);
 
   if (
@@ -25,7 +55,6 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: "Invalid note data" }, { status: 400 });
   }
 
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from("notes")
     .update({
@@ -50,6 +79,7 @@ export async function PATCH(request, { params }) {
   }
 
   revalidatePath("/");
+  revalidatePath("/archive");
   revalidatePath(`/note/${id}`);
 
   return NextResponse.json({ id });
@@ -82,6 +112,8 @@ export async function DELETE(request, { params }) {
   }
 
   revalidatePath("/");
+  revalidatePath("/archive");
+  revalidatePath("/trash");
   revalidatePath(`/note/${id}`);
 
   return NextResponse.json({ id: note.id, deletedAt: note.deleted_at });
