@@ -152,7 +152,10 @@ export function BoardIcon({ color, className = styles.boardIcon }) {
 }
 
 export default function HomeSidePanel({ boards: initialBoards, labels }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [initialLabels, setInitialLabels] = useState(labels);
+  const [createLabelOpen, setCreateLabelOpen] = useState(false);
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const [boards, setBoards] = useState(initialBoards);
   const [name, setName] = useState("");
@@ -216,12 +219,23 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             <nav className={styles.primaryNav} aria-label="Primær navigation">
               <Link
                 className={`${styles.navItem} ${styles.active}`}
-                href="/"
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/");
+                }}
               >
                 <img src="/icons/light-bulb.svg" alt="" />
                 <span>Noter</span>
-              </Link>
-              <button className={styles.navItem} type="button" disabled>
+              </button>
+              <button
+                className={styles.navItem}
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/404");
+                }}
+              >
                 <img src="/icons/bell.svg" alt="" />
                 <span>Påmindelser</span>
               </button>
@@ -237,7 +251,11 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
               >
                 Etiketter
               </h2>
-              <button className={styles.createButton} type="button" disabled>
+              <button
+                className={styles.createButton}
+                type="button"
+                onClick={() => setCreateLabelOpen(true)}
+              >
                 <Image
                   src="/icons/plus.svg"
                   alt=""
@@ -247,12 +265,20 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 />
                 <span>Opret en ny etiket</span>
               </button>
-              {labels.length > 0 && (
+              {initialLabels.length > 0 && (
                 <div className={styles.labelList}>
-                  {labels.map((label) => (
-                    <span className={styles.labelItem} key={label.id}>
+                  {initialLabels.map((label) => (
+                    <button
+                      className={styles.labelItem}
+                      type="button"
+                      key={label.id}
+                      onClick={() => {
+                        setOpen(false);
+                        router.push(`/?label=${encodeURIComponent(label.id)}`);
+                      }}
+                    >
                       {label.name}
-                    </span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -308,17 +334,51 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 <img src="/icons/bin.svg" alt="" />
                 <span>Papirkurv</span>
               </button>
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/404");
+                }}
+              >
                 <img src="/icons/settings.svg" alt="" />
                 <span>Indstillinger</span>
               </button>
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/404");
+                }}
+              >
                 <img src="/icons/question.svg" alt="" />
                 <span>Hjælp & feedback</span>
               </button>
             </nav>
           </aside>
         </>
+      )}
+
+      {createLabelOpen && (
+        <LabelPanel
+          standalone
+          fullScreen
+          title="Rediger etiketter"
+          className={styles.sideLabelPanel}
+          onClose={() => setCreateLabelOpen(false)}
+          onCreated={(label) => {
+            setInitialLabels((current) => (
+              current.some((item) => item.id === label.id)
+                ? current
+                    .map((item) => item.id === label.id ? label : item)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                : [...current, label].sort((a, b) => a.name.localeCompare(b.name))
+            ));
+          }}
+          onDeleted={(labelId) => {
+            setInitialLabels((current) => current.filter((label) => label.id !== labelId));
+          }}
+        />
       )}
 
       {createBoardOpen && (
