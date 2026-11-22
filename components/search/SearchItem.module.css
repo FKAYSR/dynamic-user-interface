@@ -30,6 +30,11 @@
   height: 24px;
 }
 
+.iconCircle img.textIcon {
+  width: 48px;
+  height: 48px;
+}
+
 .title {
   max-width: 100%;
   overflow: hidden;
