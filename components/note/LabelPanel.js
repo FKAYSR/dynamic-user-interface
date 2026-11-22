@@ -31,26 +31,38 @@ const catalog = Object.entries(icons).map(([category, names]) => ({
   items: names.split(" ").map((name) => ({ name, path: `${category}/${name}.svg` })),
 }));
 
-export default function LabelPanel({ noteId, onClose }) {
+export default function LabelPanel({
+  noteId,
+  onClose,
+  title = "Føj etiket til note",
+  standalone = false,
+  onCreated,
+  onDeleted,
+  className = "",
+  fullScreen = false,
+}) {
   const [labels, setLabels] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [query, setQuery] = useState("");
   const [icon, setIcon] = useState("tag.svg");
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
 
   useEffect(() => {
     let active = true;
-    fetch(`/api/notes/${noteId}/labels`)
+    const endpoint = standalone || !noteId ? "/api/labels" : `/api/notes/${noteId}/labels`;
+    fetch(endpoint)
       .then((response) => response.ok ? response.json() : Promise.reject())
       .then((data) => {
         if (!active) return;
         setLabels(data.labels);
-        setSelectedIds(data.selectedLabelIds);
+        setSelectedIds(data.selectedLabelIds ?? []);
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [noteId]);
+  }, [noteId, standalone]);
 
   async function saveSelectedIds(nextIds) {
     setSelectedIds(nextIds);
@@ -61,16 +73,53 @@ export default function LabelPanel({ noteId, onClose }) {
     });
   }
 
+  async function deleteLabel(labelId) {
+    const response = await fetch(`/api/labels/${labelId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) return;
+    setLabels((current) => current.filter((label) => label.id !== labelId));
+    if (editingId === labelId) {
+      setEditingId(null);
+      setEditName("");
+    }
+    onDeleted?.(labelId);
+  }
+
   async function submitQuery() {
-    const name = query.trim();
+    const name = (editingId ? editName : query).trim();
     if (!name) return;
+    if (editingId) {
+      const response = await fetch(`/api/labels/${editingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, icon }),
+      });
+      if (!response.ok) return;
+      const { label } = await response.json();
+      setLabels((current) => current
+        .map((item) => item.id === label.id ? label : item)
+        .sort((a, b) => a.name.localeCompare(b.name)));
+      onCreated?.(label);
+      setEditingId(null);
+      setEditName("");
+      setQuery("");
+      setIconPickerOpen(false);
+      return;
+    }
     const existing = labels.find((label) => label.name.toLowerCase() === name.toLowerCase());
     if (existing) {
+      if (standalone) {
+        onCreated?.(existing);
+        if (!fullScreen) onClose?.();
+        setQuery("");
+        return;
+      }
       if (!selectedIds.includes(existing.id)) await saveSelectedIds([...selectedIds, existing.id]);
       setQuery("");
       return;
     }
-    const response = await fetch(`/api/notes/${noteId}/labels`, {
+    const response = await fetch(standalone || !noteId ? "/api/labels" : `/api/notes/${noteId}/labels`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, icon }),
@@ -78,30 +127,79 @@ export default function LabelPanel({ noteId, onClose }) {
     if (!response.ok) return;
     const { label } = await response.json();
     setLabels((current) => [...current, label].sort((a, b) => a.name.localeCompare(b.name)));
-    setSelectedIds((current) => [...current, label.id]);
+    if (standalone) {
+      onCreated?.(label);
+      if (!fullScreen) onClose?.();
+    } else {
+      setSelectedIds((current) => [...current, label.id]);
+    }
     setQuery("");
     setIconPickerOpen(false);
   }
 
-  const filteredLabels = labels.filter((label) => label.name.toLowerCase().includes(query.toLowerCase()));
+  const filteredLabels = editingId
+    ? labels
+    : labels.filter((label) => label.name.toLowerCase().includes(query.toLowerCase()));
   const iconCount = catalog.reduce((count, group) => count + group.items.length, 0);
 
   return (
-    <section className={`${styles.panel} ${styles.labelPanel}`} aria-label="Tilføj etiket">
-      <div className={styles.labelHeader}>
-        <h2>Føj etiket til note</h2>
-        <button className={styles.labelClose} type="button" aria-label="Luk" onClick={onClose}><img src="/icons/cancel.svg" alt="" /></button>
-      </div>
+    <section
+      className={`${styles.panel} ${fullScreen ? styles.fullScreenLabelPanel : styles.labelPanel} ${className}`}
+      aria-label={title}
+    >
+      {fullScreen ? (
+        <header className={styles.fullScreenLabelHeader}>
+          <button className={styles.fullScreenBack} type="button" aria-label="Tilbage" onClick={onClose}>
+            <img src="/icons/arrow-left.svg" alt="" />
+          </button>
+          <h2>{title}</h2>
+        </header>
+      ) : (
+        <div className={styles.labelHeader}>
+          <h2>{title}</h2>
+          <button className={styles.labelClose} type="button" aria-label="Luk" onClick={onClose}><img src="/icons/cancel.svg" alt="" /></button>
+        </div>
+      )}
       <div className={styles.labelSearch}>
-        <button className={styles.labelIconButton} type="button" aria-label="Vælg etiketikon" aria-expanded={iconPickerOpen} onClick={() => setIconPickerOpen((open) => !open)}>
-          <img src={`/icons/${icon}`} alt="" />
-        </button>
-        <input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Angiv etiketnavn"
-          onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); submitQuery(); } if (event.key === "Escape") setQuery(""); }} />
-        {query && <button className={styles.labelClear} type="button" aria-label="Ryd søgning" onClick={() => setQuery("")}>×</button>}
-        {!query && <span className={styles.labelSearchIcon} aria-hidden="true" />}
+        {fullScreen ? (
+          <button
+            className={styles.fullScreenEditIcon}
+            type="button"
+            aria-label="Vælg etiketikon"
+            aria-expanded={iconPickerOpen}
+            onClick={() => setIconPickerOpen((open) => !open)}
+          >
+            <img src={`/icons/${icon}`} alt="" />
+          </button>
+        ) : (
+          <button className={styles.labelIconButton} type="button" aria-label="Vælg etiketikon" aria-expanded={iconPickerOpen} onClick={() => setIconPickerOpen((open) => !open)}>
+            <img src={`/icons/${icon}`} alt="" />
+          </button>
+        )}
+        <input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={fullScreen ? "Opret ny etiket" : "Angiv etiketnavn"}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              submitQuery();
+            }
+            if (event.key === "Escape") {
+              setQuery("");
+              setEditingId(null);
+              setIconPickerOpen(false);
+            }
+          }} />
+        {fullScreen ? (
+          <button className={styles.fullScreenSubmit} type="button" aria-label="Gem etiket" onClick={submitQuery}>
+            <img src="/icons/check.svg" alt="" />
+          </button>
+        ) : (
+          <>
+            {query && <button className={styles.labelClear} type="button" aria-label="Ryd søgning" onClick={() => setQuery("")}>×</button>}
+            {!query && <span className={styles.labelSearchIcon} aria-hidden="true" />}
+          </>
+        )}
       </div>
-      {query.trim() && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
+      {query.trim() && !fullScreen && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
         <button className={styles.labelCreate} type="button" onClick={submitQuery}>
           <img src="/icons/plus.svg" alt="" />
           <span>Opret <strong>"{query.trim()}"</strong></span>
@@ -124,10 +222,84 @@ export default function LabelPanel({ noteId, onClose }) {
       <div className={styles.labelList}>
         {loading ? <span className={styles.labelEmpty}>Indlæser etiketter...</span> : filteredLabels.length ? filteredLabels.map((label) => {
           const selected = selectedIds.includes(label.id);
+          if (fullScreen) {
+            if (editingId === label.id) {
+              return (
+                <div className={styles.fullScreenLabelRow} key={label.id}>
+                  <button
+                    className={styles.inlineEditIcon}
+                    type="button"
+                    aria-label="Vælg etiketikon"
+                    onClick={() => setIconPickerOpen((open) => !open)}
+                  >
+                    <img src={`/icons/${icon}`} alt="" />
+                  </button>
+                  <input
+                    className={styles.inlineEditInput}
+                    type="text"
+                    value={editName}
+                    aria-label={`Rediger navn for ${label.name}`}
+                    onChange={(event) => setEditName(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") submitQuery();
+                      if (event.key === "Escape") {
+                        setEditingId(null);
+                        setEditName("");
+                        setIconPickerOpen(false);
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    className={styles.inlineDeleteButton}
+                    type="button"
+                    aria-label={`Slet ${label.name}`}
+                    onClick={() => deleteLabel(label.id)}
+                  >
+                    <img src="/icons/bin.svg" alt="" />
+                  </button>
+                  <button
+                    className={styles.inlineSaveButton}
+                    type="button"
+                    aria-label={`Gem ${label.name}`}
+                    onClick={submitQuery}
+                  >
+                    <img src="/icons/check.svg" alt="" />
+                  </button>
+                </div>
+              );
+            }
+            return (
+              <div className={styles.fullScreenLabelRow} key={label.id}>
+                <img src={`/icons/${label.icon || "tag.svg"}`} alt="" />
+                <span>{label.name}</span>
+                <button
+                  type="button"
+                  aria-label={`Rediger ${label.name}`}
+                  onClick={() => {
+                    setEditingId(label.id);
+                    setEditName(label.name);
+                    setIcon(label.icon || "tag.svg");
+                    setIconPickerOpen(false);
+                    setQuery("");
+                  }}
+                >
+                  <img src="/icons/activities/design-pencil.svg" alt="" />
+                </button>
+              </div>
+            );
+          }
           return <button className={styles.labelOption} type="button" key={label.id} aria-pressed={selected}
-            onClick={() => saveSelectedIds(selected ? selectedIds.filter((id) => id !== label.id) : [...selectedIds, label.id])}>
+            onClick={() => {
+              if (standalone) {
+                onCreated?.(label);
+                onClose?.();
+              } else {
+                saveSelectedIds(selected ? selectedIds.filter((id) => id !== label.id) : [...selectedIds, label.id]);
+              }
+            }}>
             <img src={`/icons/${label.icon || "tag.svg"}`} alt="" /><span>{label.name}</span>
-            <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src="/icons/check.svg" alt="" />}</span>
+            {!standalone && <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src="/icons/check.svg" alt="" />}</span>}
           </button>;
         }) : query.trim() ? null : <span className={styles.labelEmpty}>Ingen etiketter fundet</span>}
       </div>

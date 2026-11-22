@@ -10,11 +10,11 @@
 
 .backButton {
   display: flex;
-  flex: 0 0 24px;
+  flex: 0 0 48px;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 48px;
+  height: 48px;
 }
 
 .backButton img {
