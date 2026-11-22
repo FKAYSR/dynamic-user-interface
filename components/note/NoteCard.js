@@ -6,17 +6,18 @@ import styles from "./NoteCard.module.css";
 import noteColors from "./noteColors";
 import { getNoteText } from "./noteContent";
 
-export default function NoteCard({ note }) {
+export default function NoteCard({ note, interactive = true }) {
   const title = getNoteText(note.title);
   const content = getNoteText(note.content);
+  const CardElement = interactive ? Link : "article";
   const activeColor =
     noteColors.find((color) => color.id === note.color)
     ?? noteColors.find((color) => color.value === note.color)
     ?? noteColors[0];
 
   return (
-    <Link
-      href={`/note/${note.id}`}
+    <CardElement
+      {...(interactive ? { href: `/note/${note.id}` } : {})}
       className={styles.card}
       style={{ backgroundColor: activeColor.value }}
       aria-label={title ? `Åbn note: ${title}` : "Åbn note"}
@@ -39,6 +40,6 @@ export default function NoteCard({ note }) {
       </div>
 
       {content && <p className={styles.content}>{content}</p>}
-    </Link>
+    </CardElement>
   );
 }

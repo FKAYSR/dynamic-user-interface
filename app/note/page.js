@@ -139,6 +139,7 @@ export default function NotePage({ initialNote = null }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
+  const [archiveError, setArchiveError] = useState(false);
   const [binHalfFull, setBinHalfFull] = useState(false);
   const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
   const [saveStatus, setSaveStatus] = useState("");
@@ -420,6 +421,31 @@ export default function NotePage({ initialNote = null }) {
           if (!response.ok) throw new Error("Kunne ikke slette noten.");
         }
 
+        async function archiveNote() {
+          if (!initialNote?.id) return;
+
+          setArchiveError(false);
+          if (!await saveNote()) {
+            setArchiveError(true);
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/notes/${initialNote.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "archive" }),
+            });
+
+            if (!response.ok) throw new Error("Kunne ikke arkivere noten.");
+
+            router.push(returnHref);
+            router.refresh();
+          } catch {
+            setArchiveError(true);
+          }
+        }
+
         router.push(returnHref);
         router.refresh();
       } catch {
@@ -480,7 +506,11 @@ export default function NotePage({ initialNote = null }) {
             </span>
             <div className={styles.topActions}>
               {topActions.map((action) => (
-                <IconControl key={action.icon} {...action} />
+                <IconControl
+                  key={action.icon}
+                  {...action}
+                  onClick={action.label === "Arkivér note" ? archiveNote : undefined}
+                />
               ))}
             </div>
           </nav>
@@ -647,6 +677,11 @@ export default function NotePage({ initialNote = null }) {
       )}
       {deleteError && (
         <p className={styles.deleteError} role="alert">Kunne ikke slette noten. Prøv igen.</p>
+      )}
+      {archiveError && (
+        <p className={styles.deleteError} role="alert">
+          Kunne ikke arkivere noten. Prøv igen.
+        </p>
       )}
     </main>
   );

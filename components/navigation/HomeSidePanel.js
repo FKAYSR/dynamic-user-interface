@@ -1,7 +1,9 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useRouter } from "next/navigation";
 import noteColors from "@/components/note/noteColors";
+import LabelPanel from "@/components/note/LabelPanel";
 import styles from "./HomeSidePanel.module.css";
 import { getBoardHref, sortBoardsByLastAccessed } from "./boardUtils";
 import Image from "next/image";
@@ -219,15 +221,12 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             <nav className={styles.primaryNav} aria-label="Primær navigation">
               <Link
                 className={`${styles.navItem} ${styles.active}`}
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/");
-                }}
+                href="/"
+                onClick={() => setOpen(false)}
               >
                 <img src="/icons/light-bulb.svg" alt="" />
                 <span>Noter</span>
-              </button>
+              </Link>
               <button
                 className={styles.navItem}
                 type="button"
@@ -326,11 +325,23 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             </section>
 
             <nav className={styles.secondaryNav} aria-label="Andre funktioner">
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/archive");
+                }}
+              >
                 <img src="/icons/archive.svg" alt="" />
                 <span>Arkiv</span>
               </button>
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/trash");
+                }}
+              >
                 <img src="/icons/bin.svg" alt="" />
                 <span>Papirkurv</span>
               </button>

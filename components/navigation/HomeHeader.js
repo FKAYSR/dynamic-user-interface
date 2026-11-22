@@ -3,7 +3,7 @@ import Seachbar from "@/components/note/Seachbar";
 import HomeSidePanel from "./HomeSidePanel";
 import styles from "./HomeHeader.module.css";
 
-export default function HomeHeader({ boards, labels, navigationKey }) {
+export default function HomeHeader({ boards, labels, navigationKey, title }) {
   return (
     <header className={styles.header}>
       <HomeSidePanel
@@ -11,11 +11,17 @@ export default function HomeHeader({ boards, labels, navigationKey }) {
         boards={boards}
         labels={labels}
       />
-      <Seachbar />
-      <Image src="/icons/sort.svg" alt="sorter" width={48} height={48} />
-      <div className={styles.touchArea}>
-        <div className={styles.avatar} />
-      </div>
+      {title ? (
+        <h1 className={styles.pageTitle}>{title}</h1>
+      ) : (
+        <>
+          <Seachbar />
+          <Image src="/icons/sort.svg" alt="sorter" width={48} height={48} />
+          <div className={styles.touchArea}>
+            <div className={styles.avatar} />
+          </div>
+        </>
+      )}
     </header>
   );
 }
