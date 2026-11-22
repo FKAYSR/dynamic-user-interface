@@ -1,11 +1,155 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import noteColors from "@/components/note/noteColors";
 import styles from "./HomeSidePanel.module.css";
+import { getBoardHref, sortBoardsByLastAccessed } from "./boardUtils";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import LabelPanel from "@/components/note/LabelPanel";
+import Link from "next/link";
+
+export function BoardIcon({ color, className = styles.boardIcon }) {
+  const id = `board-icon-${useId().replace(/:/g, "-")}`;
+
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="36"
+      height="48"
+      viewBox="0 0 36 48"
+      fill="none"
+      aria-hidden="true"
+    >
+      <g clipPath={`url(#${id}-clip)`}>
+        <path
+          d="M6 1.5H30C32.4853 1.5 34.5 3.51472 34.5 6V42C34.5 44.4853 32.4853 46.5 30 46.5H6C3.51472 46.5 1.5 44.4853 1.5 42V6C1.5 3.51472 3.51472 1.5 6 1.5Z"
+          strokeWidth="3"
+          stroke={color || "var(--colors-neutral-100)"}
+        />
+        <path
+          d="M6 1.5H30C32.4853 1.5 34.5 3.51472 34.5 6V42C34.5 44.4853 32.4853 46.5 30 46.5H6C3.51472 46.5 1.5 44.4853 1.5 42V6C1.5 3.51472 3.51472 1.5 6 1.5Z"
+          strokeWidth="3"
+          stroke="black"
+          strokeOpacity="0.27"
+        />
+        <g filter={`url(#${id}-filter-inner)`}>
+          <path
+            d="M30 3H6C4.34315 3 3 4.34315 3 6V42C3 43.6569 4.34315 45 6 45H30C31.6569 45 33 43.6569 33 42V6C33 4.34315 31.6569 3 30 3Z"
+            fill={color || "var(--colors-neutral-100)"}
+          />
+          <path
+            d="M30 3H6C4.34315 3 3 4.34315 3 6V42C3 43.6569 4.34315 45 6 45H30C31.6569 45 33 43.6569 33 42V6C33 4.34315 31.6569 3 30 3Z"
+            fill="#F8F8F8"
+            fillOpacity="0.6"
+          />
+          <g filter={`url(#${id}-filter-pink)`}>
+            <path d="M16.5 11.25H6V21.75H16.5V11.25Z" fill="#FBADC4" />
+          </g>
+          <path
+            d="M16.5 11.25H6V12.75H16.5V11.25Z"
+            fill="black"
+            fillOpacity="0.08"
+          />
+          <g filter={`url(#${id}-filter-yellow)`}>
+            <path d="M30 6H19.5V16.5H30V6Z" fill="#E8C07D" />
+          </g>
+          <path d="M30 6H19.5V7.5H30V6Z" fill="black" fillOpacity="0.08" />
+          <g filter={`url(#${id}-filter-green)`}>
+            <path d="M30 22.5H19.5V33H30V22.5Z" fill="#9FD8A1" />
+          </g>
+          <path d="M30 22.5H19.5V24H30V22.5Z" fill="black" fillOpacity="0.08" />
+          <g filter={`url(#${id}-filter-turquoise)`}>
+            <path d="M16.5 27.75H6V38.25H16.5V27.75Z" fill="#77DBCF" />
+          </g>
+          <path
+            d="M16.5 27.75H6V29.25H16.5V27.75Z"
+            fill="black"
+            fillOpacity="0.08"
+          />
+        </g>
+      </g>
+      <defs>
+        <filter
+          id={`${id}-filter-inner`}
+          x="3"
+          y="3"
+          width="30"
+          height="43.5"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="1.5" />
+          <feGaussianBlur stdDeviation="0.75" />
+          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0"
+          />
+          <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+        </filter>
+        {[
+          ["pink", "3", "9", "16.5", "16.5"],
+          ["yellow", "16.5", "3.75", "16.5", "16.5"],
+          ["green", "16.5", "20.25", "16.5", "16.5"],
+          ["turquoise", "3", "25.5", "16.5", "16.5"],
+        ].map(([color, x, y, width, height]) => (
+          <filter
+            key={color}
+            id={`${id}-filter-${color}`}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            filterUnits="userSpaceOnUse"
+            colorInterpolationFilters="sRGB"
+          >
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="0.75" />
+            <feGaussianBlur stdDeviation="1.5" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.19 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow"
+              result="shape"
+            />
+          </filter>
+        ))}
+        <clipPath id={`${id}-clip`}>
+          <rect width="36" height="48" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
 
 export default function HomeSidePanel({ boards: initialBoards, labels }) {
   const router = useRouter();
@@ -73,7 +217,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             <p className={styles.appName}>Notes</p>
 
             <nav className={styles.primaryNav} aria-label="Primær navigation">
-              <button
+              <Link
                 className={`${styles.navItem} ${styles.active}`}
                 type="button"
                 onClick={() => {
@@ -166,28 +310,16 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                   <span>Opret en ny tavle</span>
                 </button>
                 <div className={styles.boardList}>
-                  {boards.map((board) => (
-                    <button
+                  {sortBoardsByLastAccessed(boards).map((board) => (
+                    <Link
                       className={styles.boardItem}
-                      type="button"
+                      href={getBoardHref(board)}
                       key={board.id}
-                      disabled
+                      prefetch={false}
                     >
-                      <span
-                        className={styles.boardIcon}
-                        style={{
-                          "--board-color": board.color || "var(--baggrund)",
-                        }}
-                      >
-                        <span className={styles.previewNotes}>
-                          <span className={styles.previewPink} />
-                          <span className={styles.previewYellow} />
-                          <span className={styles.previewGreen} />
-                          <span className={styles.previewTurquoise} />
-                        </span>
-                      </span>
+                      <BoardIcon color={board.color} />
                       <span>{board.name}</span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -321,7 +453,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 type="submit"
                 disabled={saving}
               >
-                {saving ? "Opretter..." : "Opret"}
+                {saving ? "Gemmer..." : "Gem"}
               </button>
             </div>
           </form>

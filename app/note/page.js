@@ -13,6 +13,7 @@ import PaperLayoutPanel from "../../components/note/PaperLayoutPanel";
 import LabelPanel from "../../components/note/LabelPanel";
 import noteColors from "../../components/note/noteColors";
 import { getNoteBlocks } from "../../components/note/noteContent";
+import { getBoardHref } from "@/components/navigation/boardUtils";
 
 function decodeInitialContent(content) {
   if (!content) {
@@ -106,7 +107,7 @@ function IconControl({ href, label, icon, className = "", onClick, expanded }) {
 
   return (
     <Control
-      {...(href ? { href } : { type: "button" })}
+      {...(href ? { href, prefetch: false } : { type: "button" })}
       className={`${styles.iconButton} ${className}`}
       aria-label={label}
       onPointerDown={triggerRipple}
@@ -124,6 +125,9 @@ function IconControl({ href, label, icon, className = "", onClick, expanded }) {
 
 export default function NotePage({ initialNote = null }) {
   const router = useRouter();
+  const returnHref = initialNote?.board?.name
+    ? getBoardHref(initialNote.board)
+    : "/";
   const [title, setTitle] = useState(initialNote?.title ?? "");
   const [titleFocused, setTitleFocused] = useState(false);
   const [blocks, setBlocks] = useState(() =>
@@ -416,7 +420,7 @@ export default function NotePage({ initialNote = null }) {
           if (!response.ok) throw new Error("Kunne ikke slette noten.");
         }
 
-        router.push("/");
+        router.push(returnHref);
         router.refresh();
       } catch {
         setIsDeleting(false);
@@ -461,14 +465,14 @@ export default function NotePage({ initialNote = null }) {
         <div className={styles.topSection}>
           <nav className={styles.noteNav} aria-label="Notehandling" style={{ backgroundColor: noteColor }}>
             <IconControl
-              href="/"
-              label="Tilbage til forsiden"
+              href={returnHref}
+              label={initialNote?.board?.name ? "Tilbage til tavlen" : "Tilbage til forsiden"}
               icon="arrow-left.svg"
               className={styles.plainButton}
               onClick={async (event) => {
                 event.preventDefault();
                 await saveNote();
-                router.push("/");
+                router.push(returnHref);
               }}
             />
             <span className={styles.saveStatus} role="status" aria-live="polite">

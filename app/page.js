@@ -1,14 +1,17 @@
 import styles from "./page.module.css";
-import Seachbar from "@/components/note/Seachbar";
+import Link from "next/link";
 import NoteGrid from "@/components/note/NoteGrid";
-import Image from "next/image";
 import AddNoteButton from "@/components/note/AddNoteButton";
 import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
-import HomeSidePanel from "@/components/navigation/HomeSidePanel";
+import { BoardIcon } from "@/components/navigation/HomeSidePanel";
+import HomeHeader from "@/components/navigation/HomeHeader";
+import { getBoardHref, sortBoardsByLastAccessed } from "@/components/navigation/boardUtils";
+import getNotePreview from "@/components/note/notePreview";
 
 export const instant = false;
 
+export default async function Home() {
 function getNotePreview(content) {
   if (Array.isArray(content)) {
     return content
@@ -62,7 +65,7 @@ export default async function Home({ searchParams }) {
       .order("created_at", { ascending: false }),
     supabase
       .from("boards")
-      .select("id, name, color, created_at")
+      .select("id, name, color, created_at, last_accessed_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -131,14 +134,31 @@ export default async function Home({ searchParams }) {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <HomeSidePanel boards={boards ?? []} labels={labels ?? []} />
-        <Seachbar />
-        <Image src="/icons/sort.svg" alt="sorter" width={48} height={48} />
-        <div className={styles.touchArea}>
-          <div className={styles.avatar}></div>
-        </div>
-      </header>
+      <HomeHeader
+        navigationKey="home"
+        boards={boards ?? []}
+        labels={labels ?? []}
+      />
+      {boards?.length > 0 && (
+        <section className={styles.boardCarousel} aria-label="Tavler">
+          <div className={styles.boardCarouselItems}>
+            {sortBoardsByLastAccessed(boards).map((board) => (
+              <Link
+                className={styles.boardCarouselItem}
+                href={getBoardHref(board)}
+                key={board.id}
+                prefetch={false}
+              >
+                <BoardIcon
+                  color={board.color}
+                  className={styles.boardCarouselIcon}
+                />
+                <span className={styles.boardCarouselName}>{board.name}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       <main className={styles.main}>
         <NoteGrid notes={noteCards} />
       </main>
