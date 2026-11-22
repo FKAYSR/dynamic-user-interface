@@ -84,7 +84,14 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 <img src="/icons/light-bulb.svg" alt="" />
                 <span>Noter</span>
               </button>
-              <button className={styles.navItem} type="button" disabled>
+              <button
+                className={styles.navItem}
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/404");
+                }}
+              >
                 <img src="/icons/bell.svg" alt="" />
                 <span>Påmindelser</span>
               </button>
@@ -195,11 +202,23 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 <img src="/icons/bin.svg" alt="" />
                 <span>Papirkurv</span>
               </button>
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/404");
+                }}
+              >
                 <img src="/icons/settings.svg" alt="" />
                 <span>Indstillinger</span>
               </button>
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/404");
+                }}
+              >
                 <img src="/icons/question.svg" alt="" />
                 <span>Hjælp & feedback</span>
               </button>
