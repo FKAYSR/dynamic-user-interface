@@ -342,7 +342,11 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 <img src="/icons/light-bulb.svg" alt="" />
                 <span>Noter</span>
               </Link>
-              <Link className={styles.navItem} href="/404" onClick={() => setOpen(false)}>
+              <Link
+                className={`${styles.navItem} ${styles.unavailable}`}
+                href="/404"
+                onClick={() => setOpen(false)}
+              >
                 <img src="/icons/bell.svg" alt="" />
                 <span>Påmindelser</span>
               </Link>
@@ -458,11 +462,19 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 <img src="/icons/bin.svg" alt="" />
                 <span>Papirkurv</span>
               </Link>
-              <Link href="/404" onClick={() => setOpen(false)}>
+              <Link
+                className={styles.unavailable}
+                href="/404"
+                onClick={() => setOpen(false)}
+              >
                 <img src="/icons/settings.svg" alt="" />
                 <span>Indstillinger</span>
               </Link>
-              <Link href="/404" onClick={() => setOpen(false)}>
+              <Link
+                className={styles.unavailable}
+                href="/404"
+                onClick={() => setOpen(false)}
+              >
                 <img src="/icons/question.svg" alt="" />
                 <span>Hjælp & feedback</span>
               </Link>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "./page.module.css";
 import Link from "next/link";
 import TypographyPanel from "../../components/note/TypographyPanel";
@@ -103,6 +104,17 @@ const topActions = [
   { label: "Arkivér note", icon: "archive.svg" },
 ];
 
+const iconSizes = {
+  "pin.svg": { width: 13, height: 18 },
+  "add-user.svg": { width: 18, height: 18 },
+  "archive.svg": { width: 24, height: 24 },
+  "more-vert.svg": { width: 48, height: 48 },
+  "add-item.svg": { width: 48, height: 48 },
+  "palette.svg": { width: 48, height: 48 },
+  "A.svg": { width: 48, height: 48 },
+  "checkbox.svg": { width: 24, height: 24 },
+};
+
 const editingActions = [
   { label: "Tilføj indhold", icon: "add-item.svg", panel: "items" },
   { label: "Skift farve", icon: "palette.svg", panel: "colors" },
@@ -139,7 +151,13 @@ function IconControl({
       aria-expanded={expanded}
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
-      <img src={`/icons/${icon}`} alt="" />
+      <Image
+        src={`/icons/${icon}`}
+        alt=""
+        width={iconSizes[icon]?.width ?? 48}
+        height={iconSizes[icon]?.height ?? 48}
+        sizes="48px"
+      />
     </Control>
   );
 }
@@ -166,6 +184,7 @@ export default function NotePage({ initialNote = null }) {
   const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
   const [saveStatus, setSaveStatus] = useState("");
   const saveStatusTimeout = useRef(null);
+  const saveRequestId = useRef(0);
   const deleteTimeouts = useRef([]);
   const cancelDeleteButton = useRef(null);
   const moreOptionsButton = useRef(null);
@@ -224,6 +243,7 @@ export default function NotePage({ initialNote = null }) {
 
     const matchingColor = noteColors.find((color) => color.value === noteColor);
     const content = encodeContent(blocks);
+    const requestId = ++saveRequestId.current;
 
     showSaveStatus("Gemmer...");
     try {
@@ -240,10 +260,14 @@ export default function NotePage({ initialNote = null }) {
       });
 
       if (!response.ok) throw new Error("Kunne ikke gemme noten.");
-      showSaveStatus("Gemt");
+      if (requestId === saveRequestId.current) {
+        showSaveStatus("Gemt");
+      }
       return true;
     } catch {
-      showSaveStatus("Kunne ikke gemme");
+      if (requestId === saveRequestId.current) {
+        showSaveStatus("Kunne ikke gemme");
+      }
       return false;
     }
   }, [initialNote, title, blocks, noteColor, paperLayout, showSaveStatus]);
@@ -616,6 +640,7 @@ export default function NotePage({ initialNote = null }) {
                 id="note-title"
                 ref={titleField}
                 type="text"
+                maxLength={200}
                 placeholder={titleFocused ? "" : "Titel"}
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
@@ -648,6 +673,7 @@ export default function NotePage({ initialNote = null }) {
                     aria-label={block.type === "checklist"
                       ? `Tjeklistepunkt ${index + 1}`
                       : `Notetekst ${index + 1}`}
+                    maxLength={10000}
                     placeholder={block.type === "paragraph" && !block.text && focusedBlockId !== block.id ? "Skriv en note..." : ""}
                     value={block.text}
                     rows={1}
@@ -817,7 +843,13 @@ export default function NotePage({ initialNote = null }) {
             </>
           )}
           <div className={styles.trashCan} aria-hidden="true">
-            <img src={binHalfFull ? "/icons/bin-half-full.svg" : "/icons/bin.svg"} alt="" />
+            <Image
+              src={binHalfFull ? "/icons/bin-half-full.svg" : "/icons/bin.svg"}
+              alt=""
+              width={512}
+              height={512}
+              sizes="512px"
+            />
           </div>
         </div>
       )}

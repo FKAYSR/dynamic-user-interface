@@ -3,6 +3,20 @@ import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 import { revalidatePath } from "next/cache";
 
+const MAX_TITLE_LENGTH = 200;
+const MAX_BLOCK_COUNT = 500;
+const MAX_BLOCK_TEXT_LENGTH = 10_000;
+
+function isValidBlock(block) {
+  return (
+    block
+    && typeof block === "object"
+    && typeof block.text === "string"
+    && block.text.length <= MAX_BLOCK_TEXT_LENGTH
+    && (block.checked === undefined || typeof block.checked === "boolean")
+  );
+}
+
 // Arkiverer en note eller gemmer dens titel, indhold og udseende.
 export async function PATCH(request, { params }) {
   const user = await getCurrentUser();
@@ -12,7 +26,12 @@ export async function PATCH(request, { params }) {
   }
 
   const { id } = await params;
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
   const supabase = await createClient();
 
   if (body?.action === "archive") {
@@ -48,7 +67,10 @@ export async function PATCH(request, { params }) {
   if (
     typeof id !== "string"
     || typeof body?.title !== "string"
+    || body.title.length > MAX_TITLE_LENGTH
     || !Array.isArray(body?.content)
+    || body.content.length > MAX_BLOCK_COUNT
+    || !body.content.every(isValidBlock)
     || !validColor
     || !["blank", "lined"].includes(body?.paper)
     || !["text", "checklist", "mixed"].includes(body?.type)
