@@ -135,7 +135,6 @@ export default function NotePage({ initialNote = null }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
-  const [binHalfFull, setBinHalfFull] = useState(false);
   const [paperLayout, setPaperLayout] = useState(initialNote?.paper ?? "blank");
   const [saveStatus, setSaveStatus] = useState("");
   const saveStatusTimeout = useRef(null);
@@ -395,18 +394,11 @@ export default function NotePage({ initialNote = null }) {
 
     setDeleteDialogOpen(false);
     setDeleteError(false);
-    setBinHalfFull(false);
     setIsDeleting(true);
 
     const animationDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? 0
-      : 1350;
-    const binAnimationDelay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? 0
-      : 972;
-
-    window.setTimeout(() => setBinHalfFull(true), binAnimationDelay);
-
+      : 1200;
     window.setTimeout(async () => {
       try {
         if (initialNote?.id) {
@@ -420,7 +412,6 @@ export default function NotePage({ initialNote = null }) {
         router.refresh();
       } catch {
         setIsDeleting(false);
-        setBinHalfFull(false);
         setDeleteError(true);
         setDeleteDialogOpen(true);
       }
@@ -637,9 +628,24 @@ export default function NotePage({ initialNote = null }) {
             </>
           )}
           <div className={styles.trashCan} aria-hidden="true">
-            <img src={binHalfFull ? "/icons/bin-half-full.svg" : "/icons/bin.svg"} alt="" />
+            <img className={styles.trashEmpty} src="/icons/bin.svg" alt="" />
+            {isDeleting && (
+              <img
+                className={styles.trashHalfFull}
+                src="/icons/bin-half-full.svg"
+                alt=""
+              />
+            )}
           </div>
         </div>
+      )}
+      {isDeleting && (
+        <img
+          className={styles.paperBall}
+          src="/images/curled-paper.svg"
+          alt=""
+          aria-hidden="true"
+        />
       )}
       {deleteError && (
         <p className={styles.deleteError} role="alert">Kunne ikke slette noten. Prøv igen.</p>
