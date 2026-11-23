@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { getBoardSlug } from "@/components/navigation/boardUtils";
 
+// Opretter en tom note og sender brugeren direkte til redigering af den.
 export async function createNote(formData) {
   const user = await getCurrentUser();
 

@@ -3,6 +3,7 @@ import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 import { revalidatePath } from "next/cache";
 
+// Arkiverer en note eller gemmer dens titel, indhold og udseende.
 export async function PATCH(request, { params }) {
   const user = await getCurrentUser();
 
@@ -85,6 +86,7 @@ export async function PATCH(request, { params }) {
   return NextResponse.json({ id });
 }
 
+// Flytter noten til papirkurven uden at slette den permanent.
 export async function DELETE(request, { params }) {
   const user = await getCurrentUser();
 

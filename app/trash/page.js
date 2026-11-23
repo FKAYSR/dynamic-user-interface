@@ -2,6 +2,7 @@ import NoteCollectionPage from "@/components/note/NoteCollectionPage";
 
 export const instant = false;
 
+// Viser noter, som brugeren har lagt i papirkurven.
 export default function TrashPage() {
   return (
     <NoteCollectionPage

@@ -4,6 +4,7 @@ import { useState } from "react";
 import noteColors from "@/components/note/noteColors";
 import styles from "./page.module.css";
 
+// Styrer onboardingens trin, farvevalg og profilformular.
 export default function PreboardingFlow({
   fromLogin,
   completionError,
@@ -14,11 +15,13 @@ export default function PreboardingFlow({
   const [selectedColor, setSelectedColor] = useState(noteColors[0]);
   const [colorPanelOpen, setColorPanelOpen] = useState(false);
 
+  // Gemmer farvevalget og lukker listen over farver.
   function selectColor(color) {
     setSelectedColor(color);
     setColorPanelOpen(false);
   }
 
+  // Føjer valgene til formularen og gemmer farven lokalt til forhåndsvisning.
   function prepareColorPreference(formData) {
     formData.set("firstName", firstName);
     formData.set("defaultColorId", selectedColor.id);
@@ -31,7 +34,11 @@ export default function PreboardingFlow({
   return (
     <main className={`${styles.page} ${step === 2 ? styles.secondStep : ""}`}>
       {fromLogin && step === 1 && (
-        <section className={styles.loginPreview} aria-label="Tidligere login-side">
+        <section
+          className={styles.loginPreview}
+          aria-label="Tidligere login-side"
+          aria-hidden="true"
+        >
           <h2>Log in</h2>
           <p>Skriv email og adgangskode for at logge ind</p>
           <div className={styles.previewField}>
@@ -104,6 +111,7 @@ export default function PreboardingFlow({
               type="button"
               aria-label={`Vælg standardfarve, ${selectedColor.name}`}
               aria-expanded={colorPanelOpen}
+              aria-controls="onboarding-color-panel"
               onClick={() => setColorPanelOpen(true)}
             >
               <span className={styles.colorCircleFrame}>
@@ -163,7 +171,11 @@ export default function PreboardingFlow({
             aria-label="Luk farvevalg"
             onClick={() => setColorPanelOpen(false)}
           />
-          <section className={styles.colorPanel} aria-label="Vælg farve">
+          <section
+            id="onboarding-color-panel"
+            className={styles.colorPanel}
+            aria-label="Vælg farve"
+          >
             <h2>Farver</h2>
             <div className={styles.colorOptions}>
               {noteColors.map((color) => (

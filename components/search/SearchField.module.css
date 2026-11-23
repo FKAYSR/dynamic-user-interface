@@ -25,7 +25,6 @@
   flex: 1;
   min-width: 0;
   border: 0;
-  outline: 0;
   color: var(--colors-text);
   background: transparent;
   font: 400 15px/1 var(--typography-font-family-tekst);

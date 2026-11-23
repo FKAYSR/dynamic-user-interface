@@ -1,8 +1,10 @@
+// Læser tavlens seneste besøgstidspunkt, eller null hvis det ikke findes.
 function getLastAccessedTimestamp(board) {
   const timestamp = Date.parse(board.last_accessed_at || "");
   return Number.isNaN(timestamp) ? null : timestamp;
 }
 
+// Sorterer tavler efter seneste besøg uden at ændre den oprindelige liste.
 export function sortBoardsByLastAccessed(boards) {
   return [...boards].sort((first, second) => {
     const firstAccessed = getLastAccessedTimestamp(first);
@@ -14,10 +16,12 @@ export function sortBoardsByLastAccessed(boards) {
   });
 }
 
+// Laver et tavlenavn om til den del af URL'en, der kan læses som en sti.
 export function getBoardSlug(name) {
   return name.trim().replace(/\s+/g, "-");
 }
 
+// Bygger tavlens URL med både navn og id, så ens navne ikke bliver tvetydige.
 export function getBoardHref(board) {
   return `/boards/${encodeURIComponent(getBoardSlug(board.name))}?id=${encodeURIComponent(board.id)}`;
 }

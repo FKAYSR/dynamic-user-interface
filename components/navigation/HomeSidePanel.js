@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import noteColors from "@/components/note/noteColors";
 import LabelPanel from "@/components/note/LabelPanel";
@@ -9,6 +9,26 @@ import { getBoardHref, sortBoardsByLastAccessed } from "./boardUtils";
 import Image from "next/image";
 import Link from "next/link";
 
+// Holder tastaturfokus inde i en åben dialog, indtil brugeren lukker den.
+function keepTabFocusInside(event, container) {
+  if (event.key !== "Tab" || !container) return;
+
+  const controls = container.querySelectorAll(
+    'a[href], button:not(:disabled), input:not(:disabled)',
+  );
+  const firstControl = controls[0];
+  const lastControl = controls[controls.length - 1];
+
+  if (event.shiftKey && document.activeElement === firstControl) {
+    event.preventDefault();
+    lastControl?.focus();
+  } else if (!event.shiftKey && document.activeElement === lastControl) {
+    event.preventDefault();
+    firstControl?.focus();
+  }
+}
+
+// Tegner en tavle med farvede felter som et dekorativt ikon.
 export function BoardIcon({ color, className = styles.boardIcon }) {
   const id = `board-icon-${useId().replace(/:/g, "-")}`;
 
@@ -153,8 +173,18 @@ export function BoardIcon({ color, className = styles.boardIcon }) {
   );
 }
 
-export default function HomeSidePanel({ boards: initialBoards, labels }) {
+// Viser navigation og oprettelsesvinduer til tavler og etiketter.
+export default function HomeSidePanel({ boards: initialBoards, labels, navigationKey }) {
+  const panelId = `navigation-panel-${useId().replace(/:/g, "-")}`;
   const router = useRouter();
+  const menuButtonRef = useRef(null);
+  const panelRef = useRef(null);
+  const createLabelButtonRef = useRef(null);
+  const createBoardButtonRef = useRef(null);
+  const boardDialogRef = useRef(null);
+  const boardNameFieldRef = useRef(null);
+  const colorPickerButtonRef = useRef(null);
+  const colorPanelRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [initialLabels, setInitialLabels] = useState(labels);
   const [createLabelOpen, setCreateLabelOpen] = useState(false);
@@ -168,31 +198,103 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (!open) return;
+
+    panelRef.current?.querySelector("a[href], button:not(:disabled)")?.focus();
+    const menuButton = menuButtonRef.current;
+    return () => {
+      requestAnimationFrame(() => menuButton?.focus());
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    // Lukker det øverste åbne vindue eller holder fokus i sidemenuen.
+    function handleMenuKeys(event) {
+      if (event.key === "Escape") {
+        if (colorPanelOpen) setColorPanelOpen(false);
+        else if (createLabelOpen) setCreateLabelOpen(false);
+        else if (createBoardOpen) setCreateBoardOpen(false);
+        else setOpen(false);
+        return;
+      }
+
+      if (!createLabelOpen && !createBoardOpen && !colorPanelOpen) {
+        keepTabFocusInside(event, panelRef.current);
+      }
+    }
+
+    document.addEventListener("keydown", handleMenuKeys);
+    return () => document.removeEventListener("keydown", handleMenuKeys);
+  }, [open, colorPanelOpen, createLabelOpen, createBoardOpen]);
+
+  useEffect(() => {
+    if (createBoardOpen) {
+      boardNameFieldRef.current?.focus();
+    } else {
+      createBoardButtonRef.current?.focus();
+    }
+  }, [createBoardOpen]);
+
+  useEffect(() => {
+    if (!createLabelOpen) createLabelButtonRef.current?.focus();
+  }, [createLabelOpen]);
+
+  useEffect(() => {
+    if (colorPanelOpen) {
+      colorPanelRef.current?.querySelector("button")?.focus();
+    } else if (open) {
+      colorPickerButtonRef.current?.focus();
+    }
+  }, [colorPanelOpen, open]);
+
+  // Holder tastaturfokus i den dialog, der er åben oven på navigationen.
+  function handleDialogKeyDown(event) {
+    const container = colorPanelOpen ? colorPanelRef.current : boardDialogRef.current;
+    keepTabFocusInside(event, container);
+  }
+
+  // Opretter en tavle og viser en fejl i formularen, hvis serveren ikke lykkes.
   async function createBoard(event) {
     event.preventDefault();
-    if (!name.trim()) return;
+    const boardName = name.trim();
+    if (!boardName) {
+      setError("Skriv et navn til tavlen.");
+      boardNameFieldRef.current?.focus();
+      return;
+    }
 
     setSaving(true);
     setError("");
 
-    const response = await fetch("/api/boards", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), color: selectedColor.id }),
-    });
+    try {
+      const response = await fetch("/api/boards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: boardName, color: selectedColor.id }),
+      });
 
-    if (!response.ok) {
-      setError("Tavlen kunne ikke oprettes.");
+      if (!response.ok) {
+        setError("Tavlen kunne ikke oprettes.");
+        return;
+      }
+
+      const { board } = await response.json();
+      if (!board) {
+        throw new Error("Serveren returnerede ikke den nye tavle.");
+      }
+      setBoards((current) => [board, ...current]);
+      setName("");
+      setCreateBoardOpen(false);
+      setColorPanelOpen(false);
+    } catch (requestError) {
+      console.error("Tavlen kunne ikke oprettes:", requestError);
+      setError("Tavlen kunne ikke oprettes. Kontrollér forbindelsen, og prøv igen.");
+    } finally {
       setSaving(false);
-      return;
     }
-
-    const { board } = await response.json();
-    setBoards((current) => [board, ...current]);
-    setName("");
-    setCreateBoardOpen(false);
-    setColorPanelOpen(false);
-    setSaving(false);
   }
 
   return (
@@ -200,8 +302,12 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
       <button
         className={styles.menuButton}
         type="button"
+        ref={menuButtonRef}
+        inert={open || undefined}
         aria-label="Åbn menu"
         aria-expanded={open}
+        aria-controls={panelId}
+        aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
         <img src="/icons/burger-menu.svg" alt="" />
@@ -215,29 +321,31 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             aria-label="Luk menu"
             onClick={() => setOpen(false)}
           />
-          <aside className={styles.panel} aria-label="Navigation">
-            <p className={styles.appName}>Notes</p>
+          <aside
+            id={panelId}
+            className={styles.panel}
+            ref={panelRef}
+            inert={createBoardOpen || createLabelOpen || colorPanelOpen || undefined}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${panelId}-title`}
+          >
+            <h2 id={`${panelId}-title`} className={styles.appName}>Notes</h2>
 
             <nav className={styles.primaryNav} aria-label="Primær navigation">
               <Link
-                className={`${styles.navItem} ${styles.active}`}
+                className={`${styles.navItem} ${navigationKey === "home" ? styles.active : ""}`}
                 href="/"
+                aria-current={navigationKey === "home" ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
                 <img src="/icons/light-bulb.svg" alt="" />
                 <span>Noter</span>
               </Link>
-              <button
-                className={styles.navItem}
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/404");
-                }}
-              >
+              <Link className={styles.navItem} href="/404" onClick={() => setOpen(false)}>
                 <img src="/icons/bell.svg" alt="" />
                 <span>Påmindelser</span>
-              </button>
+              </Link>
             </nav>
 
             <section
@@ -253,6 +361,9 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
               <button
                 className={styles.createButton}
                 type="button"
+                ref={createLabelButtonRef}
+                aria-haspopup="dialog"
+                aria-expanded={createLabelOpen}
                 onClick={() => setCreateLabelOpen(true)}
               >
                 <Image
@@ -297,6 +408,9 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 <button
                   className={styles.createButton}
                   type="button"
+                  ref={createBoardButtonRef}
+                  aria-haspopup="dialog"
+                  aria-expanded={createBoardOpen}
                   onClick={() => setCreateBoardOpen(true)}
                 >
                   <Image
@@ -314,6 +428,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                       className={styles.boardItem}
                       href={getBoardHref(board)}
                       key={board.id}
+                      aria-current={navigationKey === `board-${board.id}` ? "page" : undefined}
                       prefetch={false}
                     >
                       <BoardIcon color={board.color} />
@@ -325,46 +440,32 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             </section>
 
             <nav className={styles.secondaryNav} aria-label="Andre funktioner">
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/archive");
-                }}
+              <Link
+                className={navigationKey === "archive" ? styles.active : ""}
+                href="/archive"
+                aria-current={navigationKey === "archive" ? "page" : undefined}
+                onClick={() => setOpen(false)}
               >
                 <img src="/icons/archive.svg" alt="" />
                 <span>Arkiv</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/trash");
-                }}
+              </Link>
+              <Link
+                className={navigationKey === "trash" ? styles.active : ""}
+                href="/trash"
+                aria-current={navigationKey === "trash" ? "page" : undefined}
+                onClick={() => setOpen(false)}
               >
                 <img src="/icons/bin.svg" alt="" />
                 <span>Papirkurv</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/404");
-                }}
-              >
+              </Link>
+              <Link href="/404" onClick={() => setOpen(false)}>
                 <img src="/icons/settings.svg" alt="" />
                 <span>Indstillinger</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/404");
-                }}
-              >
+              </Link>
+              <Link href="/404" onClick={() => setOpen(false)}>
                 <img src="/icons/question.svg" alt="" />
                 <span>Hjælp & feedback</span>
-              </button>
+              </Link>
             </nav>
           </aside>
         </>
@@ -393,7 +494,11 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
       )}
 
       {createBoardOpen && (
-        <div className={styles.modalLayer} role="presentation">
+        <div
+          className={styles.modalLayer}
+          role="presentation"
+          inert={colorPanelOpen || undefined}
+        >
           <button
             className={styles.modalBackdrop}
             type="button"
@@ -403,20 +508,34 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
               setCreateBoardOpen(false);
             }}
           />
-          <form className={styles.modal} onSubmit={createBoard}>
-            <h2>Opret ny Tavle</h2>
+          <form
+            className={styles.modal}
+            ref={boardDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-board-title"
+            aria-busy={saving}
+            onKeyDown={handleDialogKeyDown}
+            onSubmit={createBoard}
+          >
+            <h2 id="create-board-title">Opret ny Tavle</h2>
 
             <label className={styles.nameField}>
               <span>Tavle titel</span>
-              <small>
+              <small id="board-name-description">
                 Noter oprettet inde for en tavle vil automatisk få titlen som
                 kategori
               </small>
               <input
+                ref={boardNameFieldRef}
                 name="name"
                 type="text"
                 placeholder="Tavletitel"
                 value={name}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error
+                  ? "board-name-description board-create-error"
+                  : "board-name-description"}
                 onChange={(event) => setName(event.target.value)}
                 required
               />
@@ -432,6 +551,9 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
                 type="button"
                 aria-label={`Vælg tavlefarve, ${selectedColor.name}`}
                 aria-expanded={colorPanelOpen}
+                aria-controls="board-color-panel"
+                aria-haspopup="dialog"
+                ref={colorPickerButtonRef}
                 onClick={() => setColorPanelOpen(true)}
               >
                 <span
@@ -443,7 +565,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             </div>
 
             {error && (
-              <p className={styles.formError} role="alert">
+              <p id="board-create-error" className={styles.formError} role="alert">
                 {error}
               </p>
             )}
@@ -479,8 +601,16 @@ export default function HomeSidePanel({ boards: initialBoards, labels }) {
             aria-label="Luk farvevalg"
             onClick={() => setColorPanelOpen(false)}
           />
-          <section className={styles.colorPanel} aria-label="Vælg tavlefarve">
-            <h2>Farver</h2>
+          <section
+            id="board-color-panel"
+            className={styles.colorPanel}
+            ref={colorPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="board-color-title"
+            onKeyDown={handleDialogKeyDown}
+          >
+            <h2 id="board-color-title">Vælg tavlefarve</h2>
             <div className={styles.colorOptions}>
               {noteColors.map((color) => (
                 <button

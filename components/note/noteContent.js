@@ -1,3 +1,4 @@
+// Finder læsbar tekst i ældre og nyere formater for noteindhold.
 export function getNoteText(content) {
   if (typeof content === "string") {
     return content;
@@ -17,6 +18,7 @@ export function getNoteText(content) {
   return "";
 }
 
+// Omdanner gemt noteindhold til de blokke, noteeditoren arbejder med.
 export function getNoteBlocks(content) {
   if (Array.isArray(content)) {
     return content

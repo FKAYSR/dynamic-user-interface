@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 
+// Opretter en tavle med det valgte navn og en kendt farve.
 export async function POST(request) {
   const user = await getCurrentUser();
   if (!user) {

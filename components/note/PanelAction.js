@@ -3,6 +3,7 @@
 import styles from "./ToolPanel.module.css";
 import RippleEffect, { useRipple } from "./RippleEffect";
 
+// Viser én knap i et værktøjspanel med ikon, tekst og trykanimation.
 export default function PanelAction({ icon, label, onClick }) {
   const { ripple, triggerRipple, finishRipple } = useRipple();
 

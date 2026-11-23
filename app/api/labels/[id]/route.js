@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 
+// Opdaterer navn eller ikon på en etiket, som brugeren ejer.
 export async function PATCH(request, { params }) {
   const user = await getCurrentUser();
   if (!user) {
@@ -38,6 +39,7 @@ export async function PATCH(request, { params }) {
   return NextResponse.json({ label: data });
 }
 
+// Fjerner etiketten og dens note-forbindelser for den aktuelle bruger.
 export async function DELETE(request, { params }) {
   const user = await getCurrentUser();
   if (!user) {

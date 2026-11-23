@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import HomeHeader from "@/components/navigation/HomeHeader";
-import { getBoardHref, getBoardSlug } from "@/components/navigation/boardUtils";
+import { getBoardSlug } from "@/components/navigation/boardUtils";
 import getNotePreview from "@/components/note/notePreview";
 import NoteGrid from "@/components/note/NoteGrid";
 import AddNoteButton from "@/components/note/AddNoteButton";
@@ -9,6 +9,7 @@ import styles from "./page.module.css";
 
 export const instant = false;
 
+// Henter tavlen og dens noter efter at have kontrolleret brugerens adgang.
 export default async function BoardPage({ params, searchParams }) {
   const user = await getCurrentUser();
   if (!user) {
@@ -118,6 +119,8 @@ export default async function BoardPage({ params, searchParams }) {
               height="12"
               viewBox="0 0 12 12"
               fill="none"
+              aria-hidden="true"
+              focusable="false"
             >
               <path
                 d="M12 0H0C6.62742 0 12 5.37258 12 12V0Z"
@@ -125,7 +128,7 @@ export default async function BoardPage({ params, searchParams }) {
               />
             </svg>
             <div className={styles.boardTitleLabel}>
-              <h1>{board.name}</h1>
+              <h1 id="board-title">{board.name}</h1>
             </div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -133,6 +136,8 @@ export default async function BoardPage({ params, searchParams }) {
               height="12"
               viewBox="0 0 12 12"
               fill="none"
+              aria-hidden="true"
+              focusable="false"
             >
               <path
                 d="M0 0H12C5.37258 0 0 5.37258 0 12V0Z"
@@ -141,8 +146,14 @@ export default async function BoardPage({ params, searchParams }) {
             </svg>
           </div>
         </div>
-        <main className={styles.main}>
-          <NoteGrid notes={noteCards} />
+        <main className={styles.main} aria-labelledby="board-title">
+          {noteCards.length > 0 ? (
+            <NoteGrid notes={noteCards} />
+          ) : (
+            <p className={styles.emptyState} role="status">
+              Der er endnu ingen noter på denne tavle.
+            </p>
+          )}
         </main>
       </div>
 

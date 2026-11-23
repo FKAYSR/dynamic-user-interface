@@ -5,6 +5,7 @@ import NoteGrid from "@/components/note/NoteGrid";
 import getNotePreview from "@/components/note/notePreview";
 import styles from "@/app/page.module.css";
 
+// Henter og viser enten arkiverede noter eller noter fra papirkurven.
 export default async function NoteCollectionPage({
   title,
   collection,
@@ -71,11 +72,11 @@ export default async function NoteCollectionPage({
         labels={labels ?? []}
       />
       <main className={styles.main}>
-        {notice && <p className={styles.notice}>{notice}</p>}
+        {notice && <p className={styles.notice} role="status">{notice}</p>}
         {noteCards.length > 0 ? (
           <NoteGrid notes={noteCards} interactive={!isTrash} />
         ) : (
-          <p className={styles.emptyState}>
+          <p className={styles.emptyState} role="status">
             {isTrash ? "Papirkurven er tom." : "Arkivet er tomt."}
           </p>
         )}

@@ -144,7 +144,6 @@
   color: var(--colors-text);
   font-family: inherit;
   font-size: 16px;
-  outline: none;
 }
 
 .nameField input::placeholder {

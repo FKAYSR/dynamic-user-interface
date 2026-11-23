@@ -9,6 +9,7 @@ export const metadata = {
   title: "Log In",
 };
 
+// Godkender loginoplysninger og sender brugeren videre til det rette sted.
 async function signIn(formData) {
   "use server";
 
@@ -45,6 +46,7 @@ async function signIn(formData) {
   );
 }
 
+// Viser loginformularen og statusbeskeder fra loginforsøget.
 export default async function logInPage({ searchParams }) {
   const { error, registered } = await searchParams;
 
@@ -63,7 +65,7 @@ export default async function logInPage({ searchParams }) {
             </p>
           )}
           {error && (
-            <p className={styles.formError} role="alert">
+            <p id="login-error" className={styles.formError} role="alert">
               Forkert e-mail eller adgangskode.
             </p>
           )}
@@ -77,6 +79,8 @@ export default async function logInPage({ searchParams }) {
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "login-error" : undefined}
                 required
               />
             </div>
@@ -88,6 +92,8 @@ export default async function logInPage({ searchParams }) {
                 name="password"
                 type="password"
                 autoComplete="current-password"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "login-error" : undefined}
                 required
               />
             </div>
@@ -108,10 +114,10 @@ export default async function logInPage({ searchParams }) {
           </form>
         </div>
 
-        <div className={styles.divider} aria-label="eller">
-          <span />
+        <div className={styles.divider}>
+          <span aria-hidden="true" />
           <p>eller</p>
-          <span />
+          <span aria-hidden="true" />
         </div>
 
         <div className={styles.socialButtons}>

@@ -6,6 +6,7 @@ import SearchField from "./SearchField";
 import SearchItem from "./SearchItem";
 import styles from "@/app/search/page.module.css";
 
+// Filtrerer forslag lokalt og åbner den valgte søgning eller filtrering.
 export default function SearchBrowser({ labels, types, colors }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -27,6 +28,7 @@ export default function SearchBrowser({ labels, types, colors }) {
       : true,
   );
 
+  // Sender den indtastede tekst til forsiden, hvor noter filtreres.
   function submitSearch() {
     const value = query.trim();
     router.push(value ? `/?q=${encodeURIComponent(value)}` : "/");
@@ -34,6 +36,7 @@ export default function SearchBrowser({ labels, types, colors }) {
 
   return (
     <main className={styles.page}>
+      <h1 className={styles.pageHeading}>Søg</h1>
       <SearchField
         value={query}
         onChange={setQuery}
@@ -100,6 +103,11 @@ export default function SearchBrowser({ labels, types, colors }) {
               ))}
             </div>
           </section>
+        )}
+        {filteredLabels.length === 0 && filteredTypes.length === 0 && filteredColors.length === 0 && (
+          <p className={styles.emptyState} role="status">
+            Ingen filtre matcher din søgning.
+          </p>
         )}
       </div>
     </main>

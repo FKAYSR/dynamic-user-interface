@@ -77,3 +77,10 @@
   justify-content: flex-start;
   padding: 8px;
 }
+
+.emptyState {
+  margin: 0;
+  padding: 24px 12px;
+  color: var(--colors-neutral-700);
+  text-align: center;
+}

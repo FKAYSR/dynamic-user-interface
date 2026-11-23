@@ -7,9 +7,16 @@ import noteColors from "./noteColors";
 import { getNoteText } from "./noteContent";
 
 export default function NoteCard({ note, interactive = true }) {
+  // Displays the note preview as an article or makes the whole card a link.
   const title = getNoteText(note.title);
   const content = getNoteText(note.content);
   const CardElement = interactive ? Link : "article";
+  const preview = content.slice(0, 100).trim();
+  const cardLabel = title
+    ? `Åbn note: ${title}`
+    : preview
+      ? `Åbn note: ${preview}${content.length > preview.length ? "…" : ""}`
+      : "Åbn note uden titel eller indhold";
   const activeColor =
     noteColors.find((color) => color.id === note.color)
     ?? noteColors.find((color) => color.value === note.color)
@@ -20,7 +27,7 @@ export default function NoteCard({ note, interactive = true }) {
       {...(interactive ? { href: `/note/${note.id}` } : {})}
       className={styles.card}
       style={{ backgroundColor: activeColor.value }}
-      aria-label={title ? `Åbn note: ${title}` : "Åbn note"}
+      aria-label={interactive ? cardLabel : undefined}
     >
       {note.imageUrl && (
         <div className={styles.image}>

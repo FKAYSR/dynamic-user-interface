@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 
+// Henter alle etiketter, der tilhører den indloggede bruger.
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
@@ -22,6 +23,7 @@ export async function GET() {
   return NextResponse.json({ labels: data ?? [] });
 }
 
+// Opretter en etiket og opdaterer sider, der viser etiketlister.
 export async function POST(request) {
   const user = await getCurrentUser();
   if (!user) {

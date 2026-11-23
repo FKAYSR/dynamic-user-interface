@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 
+// Henter brugerens etiketter og viser, hvilke der er knyttet til noten.
 export async function GET(request, { params }) {
   const user = await getCurrentUser();
   if (!user) {
@@ -48,6 +49,7 @@ export async function GET(request, { params }) {
   });
 }
 
+// Opretter en ny etiket og knytter den til den angivne note.
 export async function POST(request, { params }) {
   const user = await getCurrentUser();
   if (!user) {
@@ -100,6 +102,7 @@ export async function POST(request, { params }) {
   return NextResponse.json({ label });
 }
 
+// Udskifter notens etiketter med de valgte etiketter, brugeren ejer.
 export async function PATCH(request, { params }) {
   const user = await getCurrentUser();
   if (!user) {

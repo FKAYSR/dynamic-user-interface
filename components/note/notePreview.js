@@ -1,3 +1,4 @@
+// Gør gemt noteindhold til almindelig tekst, der kan vises på et notekort.
 export default function getNotePreview(content) {
   if (Array.isArray(content)) {
     return content

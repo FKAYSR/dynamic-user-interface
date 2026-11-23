@@ -90,3 +90,8 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+:focus-visible {
+  outline: 3px solid var(--colors-marked);
+  outline-offset: 3px;
+}

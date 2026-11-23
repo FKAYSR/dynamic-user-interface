@@ -4,6 +4,7 @@ import PreboardingFlow from "./PreboardingFlow";
 
 export const instant = false;
 
+// Gemmer brugerens onboardingvalg og sender brugeren videre til noterne.
 async function completePreboarding(formData) {
   "use server";
 
@@ -55,6 +56,7 @@ async function completePreboarding(formData) {
   redirect("/");
 }
 
+// Sender brugere, der mangler onboarding, gennem deres første opsætning.
 export default async function PreboardingPage({ searchParams }) {
   const { error: completionError, fromLogin } = await searchParams;
   const user = await getCurrentUser();

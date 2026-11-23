@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import styles from "./ToolPanel.module.css";
 
 const icons = {
@@ -30,6 +30,26 @@ const catalog = Object.entries(icons).map(([category, names]) => ({
   category,
   items: names.split(" ").map((name) => ({ name, path: `${category}/${name}.svg` })),
 }));
+const iconCount = catalog.reduce((count, group) => count + group.items.length, 0);
+
+// Holder tastaturfokus inde i en åben dialog, indtil brugeren lukker den.
+function keepTabFocusInside(event, container) {
+  if (event.key !== "Tab" || !container) return;
+
+  const controls = container.querySelectorAll(
+    'a[href], button:not(:disabled), input:not(:disabled)',
+  );
+  const firstControl = controls[0];
+  const lastControl = controls[controls.length - 1];
+
+  if (event.shiftKey && document.activeElement === firstControl) {
+    event.preventDefault();
+    lastControl?.focus();
+  } else if (!event.shiftKey && document.activeElement === lastControl) {
+    event.preventDefault();
+    firstControl?.focus();
+  }
+}
 
 export default function LabelPanel({
   noteId,
@@ -41,6 +61,7 @@ export default function LabelPanel({
   className = "",
   fullScreen = false,
 }) {
+  // Styrer etiketternes valg på noter og separat administration af etiketter.
   const [labels, setLabels] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [query, setQuery] = useState("");
@@ -49,134 +70,246 @@ export default function LabelPanel({
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const iconPickerRef = useRef(null);
+  const iconPickerTrigger = useRef(null);
+  const iconPickerTitleId = useId();
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    if (fullScreen) {
+      panelRef.current?.querySelector("button:not(:disabled)")?.focus();
+    }
+  }, [fullScreen]);
 
   useEffect(() => {
     let active = true;
     const endpoint = standalone || !noteId ? "/api/labels" : `/api/notes/${noteId}/labels`;
-    fetch(endpoint)
-      .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((data) => {
+    // Hent etiketter én gang, og undgå at opdatere state efter panelet er lukket.
+    async function loadLabels() {
+      try {
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error("Etiketterne kunne ikke hentes.");
+        const data = await response.json();
         if (!active) return;
         setLabels(data.labels);
         setSelectedIds(data.selectedLabelIds ?? []);
-      })
-      .finally(() => { if (active) setLoading(false); });
+      } catch {
+        if (active) setErrorMessage("Etiketterne kunne ikke hentes. Prøv igen.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadLabels();
     return () => { active = false; };
   }, [noteId, standalone]);
 
-  async function saveSelectedIds(nextIds) {
-    setSelectedIds(nextIds);
-    await fetch(`/api/notes/${noteId}/labels`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ labelIds: nextIds }),
-    });
-  }
-
-  async function deleteLabel(labelId) {
-    const response = await fetch(`/api/labels/${labelId}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) return;
-    setLabels((current) => current.filter((label) => label.id !== labelId));
-    if (editingId === labelId) {
-      setEditingId(null);
-      setEditName("");
-    }
-    onDeleted?.(labelId);
-  }
-
-  async function submitQuery() {
-    const name = (editingId ? editName : query).trim();
-    if (!name) return;
-    if (editingId) {
-      const response = await fetch(`/api/labels/${editingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, icon }),
-      });
-      if (!response.ok) return;
-      const { label } = await response.json();
-      setLabels((current) => current
-        .map((item) => item.id === label.id ? label : item)
-        .sort((a, b) => a.name.localeCompare(b.name)));
-      onCreated?.(label);
-      setEditingId(null);
-      setEditName("");
-      setQuery("");
-      setIconPickerOpen(false);
+  useEffect(() => {
+    if (!iconPickerOpen) {
+      iconPickerTrigger.current?.focus();
       return;
     }
-    const existing = labels.find((label) => label.name.toLowerCase() === name.toLowerCase());
-    if (existing) {
-      if (standalone) {
-        onCreated?.(existing);
-        if (!fullScreen) onClose?.();
+
+    const selectedIcon = iconPickerRef.current?.querySelector(
+      'button[aria-pressed="true"]',
+    );
+    const firstIcon = iconPickerRef.current?.querySelector("button");
+    (selectedIcon ?? firstIcon)?.focus();
+  }, [iconPickerOpen]);
+
+  // Gemmer valgte etiketter på noten og ruller UI'et tilbage ved fejl.
+  async function saveSelectedIds(nextIds) {
+    if (!noteId) {
+      setErrorMessage("Noten kunne ikke findes.");
+      return false;
+    }
+
+    const previousIds = selectedIds;
+    setSelectedIds(nextIds);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(`/api/notes/${noteId}/labels`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ labelIds: nextIds }),
+      });
+      if (!response.ok) throw new Error("Etiketterne kunne ikke gemmes.");
+      return true;
+    } catch {
+      setSelectedIds(previousIds);
+      setErrorMessage("Etiketterne kunne ikke gemmes. Prøv igen.");
+      return false;
+    }
+  }
+
+  // Sletter en etiket og opdaterer både panelet og den overordnede liste.
+  async function deleteLabel(labelId) {
+    setErrorMessage("");
+    try {
+      const response = await fetch(`/api/labels/${labelId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Etiketten kunne ikke slettes.");
+      setLabels((current) => current.filter((label) => label.id !== labelId));
+      if (editingId === labelId) {
+        setEditingId(null);
+        setEditName("");
+      }
+      onDeleted?.(labelId);
+    } catch {
+      setErrorMessage("Etiketten kunne ikke slettes. Prøv igen.");
+    }
+  }
+
+  // Opretter en ny etiket, føjer en eksisterende til noten eller gemmer en redigering.
+  async function submitQuery() {
+    if (saving) return;
+    const name = (editingId ? editName : query).trim();
+    if (!name) return;
+
+    setSaving(true);
+    setErrorMessage("");
+    try {
+      if (editingId) {
+        const response = await fetch(`/api/labels/${editingId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, icon }),
+        });
+        if (!response.ok) throw new Error("Etiketten kunne ikke gemmes.");
+        const { label } = await response.json();
+        setLabels((current) => current
+          .map((item) => item.id === label.id ? label : item)
+          .sort((a, b) => a.name.localeCompare(b.name)));
+        onCreated?.(label);
+        setEditingId(null);
+        setEditName("");
+        setQuery("");
+        setIconPickerOpen(false);
+        return;
+      }
+
+      const existing = labels.find(
+        (label) => label.name.toLowerCase() === name.toLowerCase(),
+      );
+      if (existing) {
+        if (standalone) {
+          onCreated?.(existing);
+          if (!fullScreen) onClose?.();
+        } else if (!selectedIds.includes(existing.id)) {
+          const saved = await saveSelectedIds([...selectedIds, existing.id]);
+          if (!saved) return;
+        }
         setQuery("");
         return;
       }
-      if (!selectedIds.includes(existing.id)) await saveSelectedIds([...selectedIds, existing.id]);
+
+      const endpoint = standalone || !noteId
+        ? "/api/labels"
+        : `/api/notes/${noteId}/labels`;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, icon }),
+      });
+      if (!response.ok) throw new Error("Etiketten kunne ikke oprettes.");
+      const { label } = await response.json();
+      setLabels((current) => [...current, label]
+        .sort((a, b) => a.name.localeCompare(b.name)));
+
+      if (standalone) {
+        onCreated?.(label);
+        if (!fullScreen) onClose?.();
+      } else {
+        setSelectedIds((current) => [...current, label.id]);
+      }
       setQuery("");
+      setIconPickerOpen(false);
+    } catch {
+      setErrorMessage("Etiketten kunne ikke gemmes. Prøv igen.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // Lukker ikonvælgeren med Escape eller holder tastaturfokus inde i dialogen.
+  function handleIconPickerKeyDown(event) {
+    event.stopPropagation();
+    if (event.key === "Escape") {
+      setIconPickerOpen(false);
       return;
     }
-    const response = await fetch(standalone || !noteId ? "/api/labels" : `/api/notes/${noteId}/labels`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, icon }),
-    });
-    if (!response.ok) return;
-    const { label } = await response.json();
-    setLabels((current) => [...current, label].sort((a, b) => a.name.localeCompare(b.name)));
-    if (standalone) {
-      onCreated?.(label);
-      if (!fullScreen) onClose?.();
-    } else {
-      setSelectedIds((current) => [...current, label.id]);
+
+    keepTabFocusInside(event, iconPickerRef.current);
+  }
+
+  // Lukker fuldskærmsvisningen med Escape og fastholder tastaturfokus.
+  function handlePanelKeyDown(event) {
+    if (!fullScreen || iconPickerOpen) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose?.();
+      return;
     }
-    setQuery("");
-    setIconPickerOpen(false);
+
+    if (event.key === "Tab") {
+      event.stopPropagation();
+      keepTabFocusInside(event, panelRef.current);
+    }
   }
 
   const filteredLabels = editingId
     ? labels
     : labels.filter((label) => label.name.toLowerCase().includes(query.toLowerCase()));
-  const iconCount = catalog.reduce((count, group) => count + group.items.length, 0);
 
   return (
     <section
       className={`${styles.panel} ${fullScreen ? styles.fullScreenLabelPanel : styles.labelPanel} ${className}`}
       aria-label={title}
+      role={fullScreen ? "dialog" : undefined}
+      aria-modal={fullScreen ? "true" : undefined}
+      aria-busy={loading || saving}
+      ref={panelRef}
+      onKeyDown={handlePanelKeyDown}
     >
       {fullScreen ? (
-        <header className={styles.fullScreenLabelHeader}>
+        <header className={styles.fullScreenLabelHeader} inert={iconPickerOpen || undefined}>
           <button className={styles.fullScreenBack} type="button" aria-label="Tilbage" onClick={onClose}>
             <img src="/icons/arrow-left.svg" alt="" />
           </button>
           <h2>{title}</h2>
         </header>
       ) : (
-        <div className={styles.labelHeader}>
+        <div className={styles.labelHeader} inert={iconPickerOpen || undefined}>
           <h2>{title}</h2>
           <button className={styles.labelClose} type="button" aria-label="Luk" onClick={onClose}><img src="/icons/cancel.svg" alt="" /></button>
         </div>
       )}
-      <div className={styles.labelSearch}>
-        {fullScreen ? (
-          <button
-            className={styles.fullScreenEditIcon}
-            type="button"
-            aria-label="Vælg etiketikon"
-            aria-expanded={iconPickerOpen}
-            onClick={() => setIconPickerOpen((open) => !open)}
-          >
-            <img src={`/icons/${icon}`} alt="" />
-          </button>
-        ) : (
-          <button className={styles.labelIconButton} type="button" aria-label="Vælg etiketikon" aria-expanded={iconPickerOpen} onClick={() => setIconPickerOpen((open) => !open)}>
-            <img src={`/icons/${icon}`} alt="" />
-          </button>
-        )}
-        <input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={fullScreen ? "Opret ny etiket" : "Angiv etiketnavn"}
+      <div className={styles.labelSearch} inert={iconPickerOpen || undefined}>
+        <button
+          className={fullScreen ? styles.fullScreenEditIcon : styles.labelIconButton}
+          type="button"
+          aria-label="Vælg etiketikon"
+          aria-expanded={iconPickerOpen}
+          aria-controls={`${iconPickerTitleId}-panel`}
+          onClick={(event) => {
+            iconPickerTrigger.current = event.currentTarget;
+            setIconPickerOpen((open) => !open);
+          }}
+        >
+          <img src={`/icons/${icon}`} alt="" />
+        </button>
+        <input
+          type="text"
+          aria-label={fullScreen ? "Opret eller søg efter etiket" : "Søg eller opret etiket"}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={fullScreen ? "Opret ny etiket" : "Angiv etiketnavn"}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
@@ -187,9 +320,10 @@ export default function LabelPanel({
               setEditingId(null);
               setIconPickerOpen(false);
             }
-          }} />
+          }}
+        />
         {fullScreen ? (
-          <button className={styles.fullScreenSubmit} type="button" aria-label="Gem etiket" onClick={submitQuery}>
+          <button className={styles.fullScreenSubmit} type="button" aria-label="Gem etiket" onClick={submitQuery} disabled={saving}>
             <img src="/icons/check.svg" alt="" />
           </button>
         ) : (
@@ -200,14 +334,26 @@ export default function LabelPanel({
         )}
       </div>
       {query.trim() && !fullScreen && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
-        <button className={styles.labelCreate} type="button" onClick={submitQuery}>
+        <button className={styles.labelCreate} type="button" onClick={submitQuery} disabled={saving} inert={iconPickerOpen || undefined}>
           <img src="/icons/plus.svg" alt="" />
-          <span>Opret <strong>"{query.trim()}"</strong></span>
+          <span>Opret <strong>&quot;{query.trim()}&quot;</strong></span>
         </button>
       )}
-      {iconPickerOpen && <div className={styles.iconPicker} role="dialog" aria-label="Alle ikoner">
+      {errorMessage && (
+        <p className={styles.labelError} role="alert" inert={iconPickerOpen || undefined}>
+          {errorMessage}
+        </p>
+      )}
+      {iconPickerOpen && <div
+        className={styles.iconPicker}
+        id={`${iconPickerTitleId}-panel`}
+        ref={iconPickerRef}
+        role="group"
+        aria-labelledby={iconPickerTitleId}
+        onKeyDown={handleIconPickerKeyDown}
+      >
         <header className={styles.iconPickerHeader}>
-          <div><h3>Alle ikoner</h3><span>{iconCount} ikoner</span></div>
+          <div><h3 id={iconPickerTitleId}>Alle ikoner</h3><span>{iconCount} ikoner</span></div>
           <button type="button" aria-label="Luk ikonoversigt" onClick={() => setIconPickerOpen(false)}>×</button>
         </header>
         <div className={styles.iconPickerList}>
@@ -219,8 +365,8 @@ export default function LabelPanel({
           </section>)}
         </div>
       </div>}
-      <div className={styles.labelList}>
-        {loading ? <span className={styles.labelEmpty}>Indlæser etiketter...</span> : filteredLabels.length ? filteredLabels.map((label) => {
+      <div className={styles.labelList} inert={iconPickerOpen || undefined}>
+        {loading ? <span className={styles.labelEmpty} role="status">Indlæser etiketter...</span> : errorMessage && labels.length === 0 ? null : filteredLabels.length ? filteredLabels.map((label) => {
           const selected = selectedIds.includes(label.id);
           if (fullScreen) {
             if (editingId === label.id) {
@@ -230,7 +376,10 @@ export default function LabelPanel({
                     className={styles.inlineEditIcon}
                     type="button"
                     aria-label="Vælg etiketikon"
-                    onClick={() => setIconPickerOpen((open) => !open)}
+                    onClick={(event) => {
+                      iconPickerTrigger.current = event.currentTarget;
+                      setIconPickerOpen((open) => !open);
+                    }}
                   >
                     <img src={`/icons/${icon}`} alt="" />
                   </button>
@@ -301,7 +450,11 @@ export default function LabelPanel({
             <img src={`/icons/${label.icon || "tag.svg"}`} alt="" /><span>{label.name}</span>
             {!standalone && <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src="/icons/check.svg" alt="" />}</span>}
           </button>;
-        }) : query.trim() ? null : <span className={styles.labelEmpty}>Ingen etiketter fundet</span>}
+        }) : (
+          <span className={styles.labelEmpty} role="status">
+            {query.trim() ? "Ingen etiketter matcher søgningen." : "Ingen etiketter fundet."}
+          </span>
+        )}
       </div>
     </section>
   );
