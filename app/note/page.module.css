@@ -198,6 +198,8 @@
 
 .iconButton img {
   display: block;
+  width: auto;
+  height: auto;
   max-width: 48px;
   max-height: 48px;
   position: relative;
@@ -225,12 +227,6 @@
   background: transparent;
   font: inherit;
   color: var(--colors-text);
-}
-
-.titleInput:focus-visible,
-.blockInput:focus-visible {
-  outline: 2px solid var(--colors-marked);
-  outline-offset: 3px;
 }
 
 .visuallyHidden {
