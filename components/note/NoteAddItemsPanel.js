@@ -14,7 +14,12 @@ export default function NoteAddItemsPanel() {
   return (
     <section className={`${styles.panel} ${styles.itemsPanel}`} aria-label="Tilføj til note">
       {items.map((item) => (
-        <PanelAction key={item.icon} icon={item.icon} label={item.label} />
+        <PanelAction
+          key={item.icon}
+          icon={item.icon}
+          label={item.label}
+          disabled
+        />
       ))}
     </section>
   );

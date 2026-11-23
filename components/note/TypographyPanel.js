@@ -11,6 +11,7 @@ const tools = [
   { label: "Fjern formatering", icon: "remove-styling.svg", action: "clear" },
 ];
 
+// Viser formateringsværktøjer og markerer den formatering, der er aktiv.
 export default function TypographyPanel({ onClose, onFormat, activeFormat }) {
   return (
     <section className={`${styles.panel} ${styles.typographyPanel}`} aria-label="Typografi">
@@ -27,6 +28,7 @@ export default function TypographyPanel({ onClose, onFormat, activeFormat }) {
   );
 }
 
+// Tegner én formateringsknap og oplyser, hvis den er valgt.
 function TypographyButton({ tool, onClick, selected = false }) {
   const { ripple, triggerRipple, finishRipple } = useRipple();
 

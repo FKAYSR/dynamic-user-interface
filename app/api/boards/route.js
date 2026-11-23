@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 
+// Opretter en tavle med det valgte navn og en kendt farve.
 export async function POST(request) {
   const user = await getCurrentUser();
   if (!user) {
@@ -21,7 +22,7 @@ export async function POST(request) {
   const { data, error } = await supabase
     .from("boards")
     .insert({ name, color: matchingColor.value })
-    .select("id, name, color, created_at")
+    .select("id, name, color, created_at, last_accessed_at")
     .single();
 
   if (error) {

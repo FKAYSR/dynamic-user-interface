@@ -9,6 +9,7 @@ export const metadata = {
   title: "Sign Up",
 };
 
+// Opretter en konto og sender den nye bruger videre til onboarding.
 async function signUp(formData) {
   "use server";
 
@@ -34,6 +35,7 @@ async function signUp(formData) {
   redirect("/preboarding");
 }
 
+// Viser tilmeldingsformularen og forklarer, hvis oprettelsen mislykkes.
 export default async function SignUpPage({ searchParams }) {
   const { error } = await searchParams;
 
@@ -47,7 +49,7 @@ export default async function SignUpPage({ searchParams }) {
           </header>
 
           {error && (
-            <p className={styles.formError} role="alert">
+            <p id="signup-error" className={styles.formError} role="alert">
               Kontoen kunne ikke oprettes eller logges ind automatisk.
             </p>
           )}
@@ -61,6 +63,8 @@ export default async function SignUpPage({ searchParams }) {
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "signup-error" : undefined}
                 required
               />
             </div>
@@ -72,6 +76,8 @@ export default async function SignUpPage({ searchParams }) {
                 name="password"
                 type="password"
                 autoComplete="new-password"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "signup-error" : undefined}
                 minLength={6}
                 required
               />
@@ -88,10 +94,10 @@ export default async function SignUpPage({ searchParams }) {
           </form>
         </div>
 
-        <div className={styles.divider} aria-label="eller">
-          <span />
+        <div className={styles.divider}>
+          <span aria-hidden="true" />
           <p>eller</p>
-          <span />
+          <span aria-hidden="true" />
         </div>
 
         <div className={styles.socialButtons}>

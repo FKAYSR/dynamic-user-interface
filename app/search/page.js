@@ -9,6 +9,7 @@ const typeOptions = [
   { id: "mixed", name: "Blandet", icon: "/icons/layout/view-columns-2.svg" },
 ];
 
+// Finder de filtre, der faktisk bruges på brugerens aktive noter.
 export default async function SearchPage() {
   const user = await getCurrentUser();
   if (!user) {

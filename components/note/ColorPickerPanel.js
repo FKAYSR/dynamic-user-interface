@@ -1,6 +1,7 @@
 import styles from "./ToolPanel.module.css";
 import noteColors from "./noteColors";
 
+// Viser farver, så brugeren kan ændre notens baggrund.
 export default function ColorPickerPanel({ selectedColor, onSelectColor }) {
   return (
     <section

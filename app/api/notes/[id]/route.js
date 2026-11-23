@@ -3,6 +3,21 @@ import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 import { revalidatePath } from "next/cache";
 
+const MAX_TITLE_LENGTH = 200;
+const MAX_BLOCK_COUNT = 500;
+const MAX_BLOCK_TEXT_LENGTH = 10_000;
+
+function isValidBlock(block) {
+  return (
+    block
+    && typeof block === "object"
+    && typeof block.text === "string"
+    && block.text.length <= MAX_BLOCK_TEXT_LENGTH
+    && (block.checked === undefined || typeof block.checked === "boolean")
+  );
+}
+
+// Arkiverer en note eller gemmer dens titel, indhold og udseende.
 export async function PATCH(request, { params }) {
   const user = await getCurrentUser();
 
@@ -11,13 +26,51 @@ export async function PATCH(request, { params }) {
   }
 
   const { id } = await params;
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const supabase = await createClient();
+
+  if (body?.action === "archive") {
+    if (typeof id !== "string") {
+      return NextResponse.json({ error: "Invalid note ID" }, { status: 400 });
+    }
+
+    const { data: note, error } = await supabase
+      .from("notes")
+      .update({ archived: true })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      return NextResponse.json({ error: "Could not archive note" }, { status: 500 });
+    }
+    if (!note) {
+      return NextResponse.json({ error: "Note not found" }, { status: 404 });
+    }
+
+    revalidatePath("/");
+    revalidatePath("/archive");
+    revalidatePath(`/note/${id}`);
+
+    return NextResponse.json({ id: note.id });
+  }
+
   const validColor = noteColors.some((color) => color.id === body?.color);
 
   if (
     typeof id !== "string"
     || typeof body?.title !== "string"
+    || body.title.length > MAX_TITLE_LENGTH
     || !Array.isArray(body?.content)
+    || body.content.length > MAX_BLOCK_COUNT
+    || !body.content.every(isValidBlock)
     || !validColor
     || !["blank", "lined"].includes(body?.paper)
     || !["text", "checklist", "mixed"].includes(body?.type)
@@ -25,7 +78,6 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: "Invalid note data" }, { status: 400 });
   }
 
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from("notes")
     .update({
@@ -50,11 +102,13 @@ export async function PATCH(request, { params }) {
   }
 
   revalidatePath("/");
+  revalidatePath("/archive");
   revalidatePath(`/note/${id}`);
 
   return NextResponse.json({ id });
 }
 
+// Flytter noten til papirkurven uden at slette den permanent.
 export async function DELETE(request, { params }) {
   const user = await getCurrentUser();
 
@@ -82,6 +136,8 @@ export async function DELETE(request, { params }) {
   }
 
   revalidatePath("/");
+  revalidatePath("/archive");
+  revalidatePath("/trash");
   revalidatePath(`/note/${id}`);
 
   return NextResponse.json({ id: note.id, deletedAt: note.deleted_at });

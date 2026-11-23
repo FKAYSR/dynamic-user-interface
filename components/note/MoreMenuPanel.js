@@ -7,6 +7,7 @@ const actions = [
   { id: "paper", label: "Skift papir layout", icon: "layout/table-rows.svg" },
 ];
 
+// Viser notehandlinger, som ikke har plads i den primære værktøjslinje.
 export default function MoreMenuPanel({ onSelect }) {
   return (
     <section
