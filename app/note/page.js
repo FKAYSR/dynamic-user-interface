@@ -527,7 +527,6 @@ export default function NotePage({ initialNote = null }) {
 
     setDeleteDialogOpen(false);
     setDeleteError(false);
-    setBinHalfFull(false);
     setIsDeleting(true);
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -551,7 +550,6 @@ export default function NotePage({ initialNote = null }) {
         router.refresh();
       } catch {
         setIsDeleting(false);
-        setBinHalfFull(false);
         setDeleteError(true);
         setDeleteDialogOpen(true);
       }
@@ -852,6 +850,14 @@ export default function NotePage({ initialNote = null }) {
             />
           </div>
         </div>
+      )}
+      {isDeleting && (
+        <img
+          className={styles.paperBall}
+          src="/images/curled-paper.svg"
+          alt=""
+          aria-hidden="true"
+        />
       )}
       {deleteError && (
         <p className={styles.deleteError} role="alert">Kunne ikke slette noten. Prøv igen.</p>
