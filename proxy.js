@@ -1,10 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-// Next.js runs proxy.js before every request that matches the matcher.
-// Before Next.js 16 the file was called middleware.js.
-// If the access token has expired, Supabase refreshes the session,
-// and the new cookies are sent to both the page and the browser.
+// Next.js kører proxyen før de forespørgsler, der matcher konfigurationen nedenfor.
+// Hvis adgangstokenet er udløbet, fornyer Supabase sessionen og dens cookies.
 export async function proxy(request) {
   let response = NextResponse.next({ request });
 
@@ -13,22 +11,23 @@ export async function proxy(request) {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
+        // Giver Supabase adgang til cookies fra den aktuelle forespørgsel.
         getAll() {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet, headers) {
-          // The page reads the new cookies from the request
+          // Gør de fornyede cookies synlige for den aktuelle sideanmodning.
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
           response = NextResponse.next({ request });
 
-          // The browser saves the new cookies from the response
+          // Sender også de fornyede cookies til browseren.
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
 
-          // A response with a session must never be cached and shown to someone else
+          // Forhindrer, at et sessionsvar caches og vises til en anden bruger.
           Object.entries(headers).forEach(([key, value]) =>
             response.headers.set(key, value),
           );
@@ -37,8 +36,7 @@ export async function proxy(request) {
     },
   );
 
-  // Don't write code between createServerClient and getClaims().
-  // getClaims() is what refreshes the session when the access token has expired.
+  // Hold createServerClient() og getClaims() samlet; getClaims() fornyer sessionen.
   await supabase.auth.getClaims();
 
   return response;
@@ -46,7 +44,7 @@ export async function proxy(request) {
 
 export const config = {
   matcher: [
-    // Every path except static files and images
+    // Alle stier undtagen statiske filer og billeder.
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -3,10 +3,12 @@
 import { useRef, useState } from "react";
 import styles from "./RippleEffect.module.css";
 
+// Beregner og viser en dekorativ trykbølge ved klik eller tastaturaktivering.
 export function useRipple() {
   const [ripple, setRipple] = useState(null);
   const nextId = useRef(0);
 
+  // Starter trykbølgen dér, hvor brugeren trykkede på knappen.
   function triggerRipple(event) {
     const bounds = event.currentTarget.getBoundingClientRect();
     const keyboardClick = event.type === "click" && event.detail === 0;
@@ -17,6 +19,7 @@ export function useRipple() {
     setRipple({ id: ++nextId.current, x, y, size: radius * 2 });
   }
 
+  // Fjerner kun den trykbølge, hvis animation netop er afsluttet.
   function finishRipple(id) {
     setRipple((current) => current?.id === id ? null : current);
   }
@@ -24,6 +27,7 @@ export function useRipple() {
   return { ripple, triggerRipple, finishRipple };
 }
 
+// Tegner den aktuelle trykbølge uden at tilføje støj til skærmlæseren.
 export default function RippleEffect({ ripple, onFinish }) {
   if (!ripple) return null;
 

@@ -3,11 +3,13 @@ import Seachbar from "@/components/note/Seachbar";
 import HomeSidePanel from "./HomeSidePanel";
 import styles from "./HomeHeader.module.css";
 
+// Samler sidemenuen med søgning eller overskriften for den aktuelle visning.
 export default function HomeHeader({ boards, labels, navigationKey, title }) {
   return (
     <header className={styles.header}>
       <HomeSidePanel
         key={navigationKey}
+        navigationKey={navigationKey}
         boards={boards}
         labels={labels}
       />
@@ -16,7 +18,7 @@ export default function HomeHeader({ boards, labels, navigationKey, title }) {
       ) : (
         <>
           <Seachbar />
-          <Image src="/icons/sort.svg" alt="sorter" width={48} height={48} />
+          <Image src="/icons/sort.svg" alt="" width={48} height={48} />
           <div className={styles.touchArea}>
             <div className={styles.avatar} />
           </div>

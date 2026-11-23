@@ -1,6 +1,7 @@
 import styles from "./SearchItem.module.css";
 import Image from "next/image";
 
+// Viser et klikbart filterforslag med et beskrivende navn for skærmlæsere.
 export default function SearchItem({ title, icon, color, onClick }) {
   return (
     <button className={styles.item} type="button" aria-label={`Søg efter ${title}`} onClick={onClick}>

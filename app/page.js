@@ -11,6 +11,7 @@ import getNotePreview from "@/components/note/notePreview";
 
 export const instant = false;
 
+// Henter brugerens aktive noter og viser dem sammen med tavler og etiketter.
 export default async function Home({ searchParams }) {
   const user = await getCurrentUser();
   if (!user) {
@@ -114,6 +115,7 @@ export default async function Home({ searchParams }) {
       />
       {boards?.length > 0 && (
         <section className={styles.boardCarousel} aria-label="Tavler">
+          <h2 className={styles.visuallyHidden}>Tavler</h2>
           <div className={styles.boardCarouselItems}>
             {sortBoardsByLastAccessed(boards).map((board) => (
               <Link
@@ -133,7 +135,16 @@ export default async function Home({ searchParams }) {
         </section>
       )}
       <main className={styles.main}>
-        <NoteGrid notes={noteCards} />
+        <h1 className={styles.visuallyHidden}>Noter</h1>
+        {noteCards.length > 0 ? (
+          <NoteGrid notes={noteCards} />
+        ) : (
+          <p className={styles.emptyState} role="status">
+            {query || colorFilter || typeFilter || labelFilter
+              ? "Ingen noter matcher dine filtre."
+              : "Du har ikke oprettet nogen noter endnu."}
+          </p>
+        )}
       </main>
       <AddNoteButton />
     </div>

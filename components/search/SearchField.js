@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./SearchField.module.css";
 
+// Viser et søgefelt med tilbage-link og sender formularen videre til søgeren.
 export default function SearchField({
   placeholder = "Søg i Keep Noter",
   backHref = "/",

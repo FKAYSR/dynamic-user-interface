@@ -164,6 +164,11 @@
   background: var(--colors-neutral-300);
 }
 
+.iconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .iconButton:focus-visible {
   outline: 2px solid var(--colors-neutral-500);
   outline-offset: 2px;
@@ -220,6 +225,22 @@
   background: transparent;
   font: inherit;
   color: var(--colors-text);
+}
+
+.titleInput:focus-visible,
+.blockInput:focus-visible {
+  outline: 2px solid var(--colors-marked);
+  outline-offset: 3px;
+}
+
+.visuallyHidden {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
 }
 
 .titleInput {

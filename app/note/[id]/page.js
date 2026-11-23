@@ -4,6 +4,7 @@ import NotePage from "../page";
 
 export const instant = false;
 
+// Henter en note, brugeren ejer, og giver den videre til noteeditoren.
 export default async function SpecificNotePage({ params }) {
   const user = await getCurrentUser();
   if (!user) {

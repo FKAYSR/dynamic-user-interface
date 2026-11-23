@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 
+// Returnerer profilnavn og standardfarve for den indloggede bruger.
 export async function GET() {
   const user = await getCurrentUser();
 
@@ -18,6 +19,7 @@ export async function GET() {
   });
 }
 
+// Kontrollerer og gemmer brugerens valgte standardfarve.
 export async function PATCH(request) {
   const user = await getCurrentUser();
 

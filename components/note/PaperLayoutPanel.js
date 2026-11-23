@@ -5,6 +5,7 @@ const layouts = [
   { id: "lined", label: "Linjeret" },
 ];
 
+// Lader brugeren vælge mellem tomt og linjeret noteunderlag.
 export default function PaperLayoutPanel({ selectedLayout, onSelectLayout }) {
   return (
     <section className={`${styles.panel} ${styles.paperPanel}`} aria-label="Vælg papir layout">

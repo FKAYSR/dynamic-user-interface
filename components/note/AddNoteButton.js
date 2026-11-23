@@ -1,6 +1,7 @@
 import { createNote } from "@/app/actions";
 import styles from "./AddNoteButton.module.css";
 
+// Sender en ny note til serverhandlingen, eventuelt på en bestemt tavle.
 export default function AddNoteButton({ boardId = null }) {
   return (
     <form action={createNote} className={styles.form}>

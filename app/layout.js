@@ -18,9 +18,8 @@ export const metadata = {
   description: "App lavet i et skole eksamens projekt",
 };
 
-export default async function RootLayout({ children }) {
-  const defaultNoteColor = "var(--colors-sticky-notes-standard)";
-
+// Sætter dokumentets sprog, globale skrifttyper og indholdet for alle sider.
+export default function RootLayout({ children }) {
   return (
     <html lang="da" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>{children}</body>

@@ -10,6 +10,7 @@ const items = [
   { label: "Tegning", icon: "tegning.svg" },
 ];
 
+// Viser de typer ekstra indhold, der kan føjes til en note.
 export default function NoteAddItemsPanel() {
   return (
     <section className={`${styles.panel} ${styles.itemsPanel}`} aria-label="Tilføj til note">

@@ -7,6 +7,16 @@
   background-color: var(--colors-neutral-50);
 }
 
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .main {
   display: flex;
   flex: 1;
@@ -63,11 +73,7 @@
   color: var(--colors-text);
   font: 400 16px/1 var(--typography-font-family-tekst);
   text-align: center;
-  cursor: default;
-}
-
-.boardCarouselItem:disabled {
-  opacity: 1;
+  cursor: pointer;
 }
 
 .boardCarouselIcon {
