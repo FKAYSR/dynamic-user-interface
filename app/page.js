@@ -65,6 +65,7 @@ export default async function Home({ searchParams }) {
   if (linksError) throw linksError;
 
   let filteredNotes = notes ?? [];
+  const selectedLabel = (labels ?? []).find((label) => label.id === labelFilter);
   if (colorFilter) {
     filteredNotes = filteredNotes.filter((note) => (note.color || "standard") === colorFilter);
   }
@@ -112,8 +113,9 @@ export default async function Home({ searchParams }) {
         navigationKey="home"
         boards={boards ?? []}
         labels={labels ?? []}
+        title={selectedLabel?.name}
       />
-      {boards?.length > 0 && (
+      {!labelFilter && boards?.length > 0 && (
         <section className={styles.boardCarousel} aria-label="Tavler">
           <h2 className={styles.visuallyHidden}>Tavler</h2>
           <div className={styles.boardCarouselItems}>
