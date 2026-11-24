@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { iconPath } from "../iconPath";
 import styles from "./SearchField.module.css";
 
 // Viser et søgefelt med tilbage-link og sender formularen videre til søgeren.
@@ -20,7 +21,7 @@ export default function SearchField({
       }}
     >
       <Link className={styles.backButton} href={backHref} aria-label="Tilbage">
-        <Image src="/icons/arrow-left.svg" alt="" width={48} height={48} />
+        <Image src={iconPath("arrow-left.svg")} alt="" width={48} height={48} />
       </Link>
       <input
         className={styles.input}

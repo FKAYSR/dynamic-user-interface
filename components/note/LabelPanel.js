@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import styles from "./ToolPanel.module.css";
+import { iconPath } from "../iconPath";
 
 const icons = {
   activities: "1st-medal archery arrow-archery basketball-field basketball beer billiard birthday-cake bonfire book-stack book bookmark-book bowling-ball boxing-glove cinema-old cocktail cycling dart design-pencil dices disco favourite-book fire-flame Fishing flower football-ball football golf gym headphones hourglass karaoke leaderboard-star leaderboard locked-book lullaby magic-wand math-book medal movie music-double-note no-smoking-circle no-smoking open-book palette puzzle quiz rings running sea-and-sun sea-waves skateboard skateboarding smoking soccer-ball stretching swimming table tennis-ball-alt tennis-ball treadmill trekking trophy waist walking yoga",
@@ -280,14 +281,14 @@ export default function LabelPanel({
       {fullScreen ? (
         <header className={styles.fullScreenLabelHeader} inert={iconPickerOpen || undefined}>
           <button className={styles.fullScreenBack} type="button" aria-label="Tilbage" onClick={onClose}>
-            <img src="/icons/arrow-left.svg" alt="" />
+            <img src={iconPath("arrow-left.svg")} alt="" />
           </button>
           <h2>{title}</h2>
         </header>
       ) : (
         <div className={styles.labelHeader} inert={iconPickerOpen || undefined}>
           <h2>{title}</h2>
-          <button className={styles.labelClose} type="button" aria-label="Luk" onClick={onClose}><img src="/icons/cancel.svg" alt="" /></button>
+          <button className={styles.labelClose} type="button" aria-label="Luk" onClick={onClose}><img src={iconPath("cancel.svg")} alt="" /></button>
         </div>
       )}
       <div className={styles.labelSearch} inert={iconPickerOpen || undefined}>
@@ -302,7 +303,7 @@ export default function LabelPanel({
             setIconPickerOpen((open) => !open);
           }}
         >
-          <img src={`/icons/${icon}`} alt="" />
+          <img src={iconPath(icon)} alt="" />
         </button>
         <input
           type="text"
@@ -324,7 +325,7 @@ export default function LabelPanel({
         />
         {fullScreen ? (
           <button className={styles.fullScreenSubmit} type="button" aria-label="Gem etiket" onClick={submitQuery} disabled={saving}>
-            <img src="/icons/check.svg" alt="" />
+            <img src={iconPath("check.svg")} alt="" />
           </button>
         ) : (
           <>
@@ -335,7 +336,7 @@ export default function LabelPanel({
       </div>
       {query.trim() && !fullScreen && !labels.some((label) => label.name.toLowerCase() === query.trim().toLowerCase()) && (
         <button className={styles.labelCreate} type="button" onClick={submitQuery} disabled={saving} inert={iconPickerOpen || undefined}>
-          <img src="/icons/plus.svg" alt="" />
+          <img src={iconPath("plus.svg")} alt="" />
           <span>Opret <strong>&quot;{query.trim()}&quot;</strong></span>
         </button>
       )}
@@ -360,7 +361,7 @@ export default function LabelPanel({
           {catalog.map((group) => <section className={styles.iconCategory} key={group.category}>
             <h4>{group.category}</h4>
             <div>{group.items.map((item) => <button type="button" key={item.path} aria-label={item.name} aria-pressed={icon === item.path} onClick={() => { setIcon(item.path); setIconPickerOpen(false); }}>
-              <img src={`/icons/${item.path}`} alt="" />
+              <img src={iconPath(item.path)} alt="" />
             </button>)}</div>
           </section>)}
         </div>
@@ -381,7 +382,7 @@ export default function LabelPanel({
                       setIconPickerOpen((open) => !open);
                     }}
                   >
-                    <img src={`/icons/${icon}`} alt="" />
+                    <img src={iconPath(icon)} alt="" />
                   </button>
                   <input
                     className={styles.inlineEditInput}
@@ -405,7 +406,7 @@ export default function LabelPanel({
                     aria-label={`Slet ${label.name}`}
                     onClick={() => deleteLabel(label.id)}
                   >
-                    <img src="/icons/bin.svg" alt="" />
+                    <img src={iconPath("bin.svg")} alt="" />
                   </button>
                   <button
                     className={styles.inlineSaveButton}
@@ -413,14 +414,14 @@ export default function LabelPanel({
                     aria-label={`Gem ${label.name}`}
                     onClick={submitQuery}
                   >
-                    <img src="/icons/check.svg" alt="" />
+                    <img src={iconPath("check.svg")} alt="" />
                   </button>
                 </div>
               );
             }
             return (
               <div className={styles.fullScreenLabelRow} key={label.id}>
-                <img src={`/icons/${label.icon || "tag.svg"}`} alt="" />
+                <img src={iconPath(label.icon)} alt="" />
                 <span>{label.name}</span>
                 <button
                   type="button"
@@ -433,7 +434,7 @@ export default function LabelPanel({
                     setQuery("");
                   }}
                 >
-                  <img src="/icons/activities/design-pencil.svg" alt="" />
+                  <img src={iconPath("activities/design-pencil.svg")} alt="" />
                 </button>
               </div>
             );
@@ -447,8 +448,8 @@ export default function LabelPanel({
                 saveSelectedIds(selected ? selectedIds.filter((id) => id !== label.id) : [...selectedIds, label.id]);
               }
             }}>
-            <img src={`/icons/${label.icon || "tag.svg"}`} alt="" /><span>{label.name}</span>
-            {!standalone && <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src="/icons/check.svg" alt="" />}</span>}
+            <img src={iconPath(label.icon)} alt="" /><span>{label.name}</span>
+            {!standalone && <span className={`${styles.labelCheckbox} ${selected ? styles.labelChecked : ""}`}>{selected && <img src={iconPath("check.svg")} alt="" />}</span>}
           </button>;
         }) : (
           <span className={styles.labelEmpty} role="status">

@@ -1,5 +1,6 @@
 import styles from "./ToolPanel.module.css";
 import RippleEffect, { useRipple } from "./RippleEffect";
+import { iconPath } from "../iconPath";
 
 const tools = [
   { label: "Overskrift 1", icon: "h1.svg", action: "h1" },
@@ -45,7 +46,7 @@ function TypographyButton({ tool, onClick, selected = false }) {
       }}
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
-      <img src={`/icons/${tool.icon}`} alt="" />
+      <img src={iconPath(tool.icon)} alt="" />
     </button>
   );
 }

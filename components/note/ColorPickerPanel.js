@@ -1,4 +1,5 @@
 import styles from "./ToolPanel.module.css";
+import { iconPath } from "../iconPath";
 import noteColors from "./noteColors";
 
 // Viser farver, så brugeren kan ændre notens baggrund.
@@ -22,8 +23,8 @@ export default function ColorPickerPanel({ selectedColor, onSelectColor }) {
               style={{ backgroundColor: color.value }}
               onClick={() => onSelectColor(color.value)}
             >
-              {color.icon && <img className={styles.dropletIcon} src={`/icons/${color.icon}`} alt="" />}
-              {selected && <img className={styles.selectedMark} src="/icons/color-selected.svg" alt="" />}
+              {color.icon && <img className={styles.dropletIcon} src={iconPath(color.icon)} alt="" />}
+              {selected && <img className={styles.selectedMark} src={iconPath("color-selected.svg")} alt="" />}
             </button>
           );
         })}
