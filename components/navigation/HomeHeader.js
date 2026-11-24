@@ -1,10 +1,11 @@
 import Image from "next/image";
-import Seachbar from "@/components/note/Seachbar";
+import Searchbar from "@/components/note/Searchbar";
 import HomeSidePanel from "./HomeSidePanel";
 import styles from "./HomeHeader.module.css";
+import { iconPath } from "@/lib/iconPath";
 
 // Samler sidemenuen med søgning eller overskriften for den aktuelle visning.
-export default function HomeHeader({ boards, labels, navigationKey, title }) {
+export default function HomeHeader({ boards, labels, navigationKey, title, titleIcon }) {
   return (
     <header className={styles.header}>
       <HomeSidePanel
@@ -14,11 +15,22 @@ export default function HomeHeader({ boards, labels, navigationKey, title }) {
         labels={labels}
       />
       {title ? (
-        <h1 className={styles.pageTitle}>{title}</h1>
+        <h1 className={styles.pageTitle}>
+          {titleIcon && (
+            <Image
+              className={styles.pageTitleIcon}
+              src={iconPath(titleIcon)}
+              alt=""
+              width={24}
+              height={24}
+            />
+          )}
+          {title}
+        </h1>
       ) : (
         <>
-          <Seachbar />
-          <Image src="/icons/sort.svg" alt="" width={48} height={48} />
+          <Searchbar />
+          <Image src={iconPath("sort.svg")} alt="" width={48} height={48} />
           <div className={styles.touchArea}>
             <div className={styles.avatar} />
           </div>

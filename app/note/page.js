@@ -15,6 +15,7 @@ import LabelPanel from "../../components/note/LabelPanel";
 import noteColors from "../../components/note/noteColors";
 import { getNoteBlocks } from "../../components/note/noteContent";
 import { getBoardHref } from "@/components/navigation/boardUtils";
+import { iconPath } from "@/lib/iconPath";
 
 // Normaliserer ét gemt afsnit og genkender også den gamle tjeklistetekst.
 function decodeBlock(block, index) {
@@ -152,7 +153,7 @@ function IconControl({
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
       <Image
-        src={`/icons/${icon}`}
+        src={iconPath(icon)}
         alt=""
         width={iconSizes[icon]?.width ?? 48}
         height={iconSizes[icon]?.height ?? 48}
@@ -216,7 +217,7 @@ export default function NotePage({ initialNote = null }) {
       : "var(--baggrund)",
   );
   const nextBlockId = useRef(
-    getNoteBlocks(initialNote?.content).reduce(
+    decodeInitialContent(initialNote?.content).reduce(
       (highestId, block) => Math.max(highestId, Number(block.id) || 0),
       0,
     ),
@@ -842,7 +843,7 @@ export default function NotePage({ initialNote = null }) {
           )}
           <div className={styles.trashCan} aria-hidden="true">
             <Image
-              src={binHalfFull ? "/icons/bin-half-full.svg" : "/icons/bin.svg"}
+              src={iconPath(binHalfFull ? "bin-half-full.svg" : "bin.svg")}
               alt=""
               width={512}
               height={512}

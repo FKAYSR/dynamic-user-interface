@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import noteColors from "@/components/note/noteColors";
 import LabelPanel from "@/components/note/LabelPanel";
 import styles from "./HomeSidePanel.module.css";
+import { iconPath } from "@/lib/iconPath";
 import { getBoardHref, sortBoardsByLastAccessed } from "./boardUtils";
 import Image from "next/image";
 import Link from "next/link";
@@ -310,7 +311,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
-        <img src="/icons/burger-menu.svg" alt="" />
+        <Image src={iconPath("burger-menu.svg")} alt="" width={48} height={48} />
       </button>
 
       {open && (
@@ -339,7 +340,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 aria-current={navigationKey === "home" ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
-                <img src="/icons/light-bulb.svg" alt="" />
+                <Image src={iconPath("light-bulb.svg")} alt="" width={24} height={24} />
                 <span>Noter</span>
               </Link>
               <Link
@@ -347,7 +348,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 href="/404"
                 onClick={() => setOpen(false)}
               >
-                <img src="/icons/bell.svg" alt="" />
+                <Image src={iconPath("bell.svg")} alt="" width={24} height={24} />
                 <span>Påmindelser</span>
               </Link>
             </nav>
@@ -371,7 +372,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 onClick={() => setCreateLabelOpen(true)}
               >
                 <Image
-                  src="/icons/plus.svg"
+                  src={iconPath("plus.svg")}
                   alt=""
                   width={48}
                   height={48}
@@ -391,7 +392,14 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                         router.push(`/?label=${encodeURIComponent(label.id)}`);
                       }}
                     >
-                      {label.name}
+                      <Image
+                        className={styles.labelIcon}
+                        src={iconPath(label.icon)}
+                        alt=""
+                        width={24}
+                        height={24}
+                      />
+                      <span>{label.name}</span>
                     </button>
                   ))}
                 </div>
@@ -418,7 +426,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                   onClick={() => setCreateBoardOpen(true)}
                 >
                   <Image
-                    src="/icons/plus.svg"
+                    src={iconPath("plus.svg")}
                     alt=""
                     width={48}
                     height={48}
@@ -450,7 +458,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 aria-current={navigationKey === "archive" ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
-                <img src="/icons/archive.svg" alt="" />
+                <Image src={iconPath("archive.svg")} alt="" width={24} height={24} />
                 <span>Arkiv</span>
               </Link>
               <Link
@@ -459,7 +467,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 aria-current={navigationKey === "trash" ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
-                <img src="/icons/bin.svg" alt="" />
+                <Image src={iconPath("bin.svg")} alt="" width={24} height={24} />
                 <span>Papirkurv</span>
               </Link>
               <Link
@@ -467,7 +475,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 href="/404"
                 onClick={() => setOpen(false)}
               >
-                <img src="/icons/settings.svg" alt="" />
+                <Image src={iconPath("settings.svg")} alt="" width={24} height={24} />
                 <span>Indstillinger</span>
               </Link>
               <Link
@@ -475,7 +483,7 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                 href="/404"
                 onClick={() => setOpen(false)}
               >
-                <img src="/icons/question.svg" alt="" />
+                <Image src={iconPath("question.svg")} alt="" width={24} height={24} />
                 <span>Hjælp & feedback</span>
               </Link>
             </nav>

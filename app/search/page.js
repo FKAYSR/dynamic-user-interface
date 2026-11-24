@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 import SearchBrowser from "@/components/search/SearchBrowser";
+import { iconPath } from "@/lib/iconPath";
 
 const typeOptions = [
-  { id: "text", name: "Tekst", icon: "/icons/Aa.svg" },
-  { id: "checklist", name: "Lister", icon: "/icons/checkbox.svg" },
-  { id: "mixed", name: "Blandet", icon: "/icons/layout/view-columns-2.svg" },
+  { id: "text", name: "Tekst", icon: iconPath("Aa.svg") },
+  { id: "checklist", name: "Lister", icon: iconPath("checkbox.svg") },
+  { id: "mixed", name: "Blandet", icon: iconPath("layout/view-columns-2.svg") },
 ];
 
 // Finder de filtre, der faktisk bruges på brugerens aktive noter.

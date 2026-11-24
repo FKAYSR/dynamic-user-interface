@@ -5,6 +5,8 @@ import { useState } from "react";
 import SearchField from "./SearchField";
 import SearchItem from "./SearchItem";
 import styles from "@/app/search/page.module.css";
+import { iconPath } from "@/lib/iconPath";
+import Image from "next/image";
 
 // Filtrerer forslag lokalt og åbner den valgte søgning eller filtrering.
 export default function SearchBrowser({ labels, types, colors }) {
@@ -36,7 +38,6 @@ export default function SearchBrowser({ labels, types, colors }) {
 
   return (
     <main className={styles.page}>
-      <h1 className={styles.pageHeading}>Søg</h1>
       <SearchField
         value={query}
         onChange={setQuery}
@@ -53,7 +54,7 @@ export default function SearchBrowser({ labels, types, colors }) {
                 <SearchItem
                   key={label.id}
                   title={label.name}
-                  icon={`/icons/${label.icon || "tag.svg"}`}
+                  icon={iconPath(label.icon)}
                   onClick={() => router.push(`/?label=${encodeURIComponent(label.id)}`)}
                 />
               ))}
@@ -96,7 +97,7 @@ export default function SearchBrowser({ labels, types, colors }) {
                     style={{ "--swatch-color": color.value }}
                   >
                     {color.icon && (
-                      <img src={`/icons/${color.icon}`} alt="" width={24} height={24} />
+                      <Image src={iconPath(color.icon)} alt="" width={24} height={24} />
                     )}
                   </span>
                 </button>
