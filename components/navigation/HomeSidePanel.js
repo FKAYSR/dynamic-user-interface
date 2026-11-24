@@ -392,7 +392,14 @@ export default function HomeSidePanel({ boards: initialBoards, labels, navigatio
                         router.push(`/?label=${encodeURIComponent(label.id)}`);
                       }}
                     >
-                      {label.name}
+                      <Image
+                        className={styles.labelIcon}
+                        src={iconPath(label.icon)}
+                        alt=""
+                        width={24}
+                        height={24}
+                      />
+                      <span>{label.name}</span>
                     </button>
                   ))}
                 </div>

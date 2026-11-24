@@ -114,6 +114,7 @@ export default async function Home({ searchParams }) {
         boards={boards ?? []}
         labels={labels ?? []}
         title={selectedLabel?.name}
+        titleIcon={selectedLabel ? (selectedLabel.icon || "tag.svg") : undefined}
       />
       {!labelFilter && boards?.length > 0 && (
         <section className={styles.boardCarousel} aria-label="Tavler">
