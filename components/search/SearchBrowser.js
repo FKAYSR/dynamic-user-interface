@@ -5,7 +5,7 @@ import { useState } from "react";
 import SearchField from "./SearchField";
 import SearchItem from "./SearchItem";
 import styles from "@/app/search/page.module.css";
-import { iconPath } from "../iconPath";
+import { iconPath } from "@/lib/iconPath";
 
 // Filtrerer forslag lokalt og åbner den valgte søgning eller filtrering.
 export default function SearchBrowser({ labels, types, colors }) {
@@ -37,7 +37,6 @@ export default function SearchBrowser({ labels, types, colors }) {
 
   return (
     <main className={styles.page}>
-      <h1 className={styles.pageHeading}>Søg</h1>
       <SearchField
         value={query}
         onChange={setQuery}

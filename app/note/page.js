@@ -15,7 +15,7 @@ import LabelPanel from "../../components/note/LabelPanel";
 import noteColors from "../../components/note/noteColors";
 import { getNoteBlocks } from "../../components/note/noteContent";
 import { getBoardHref } from "@/components/navigation/boardUtils";
-import { iconPath } from "../../components/iconPath";
+import { iconPath } from "@/lib/iconPath";
 
 // Normaliserer ét gemt afsnit og genkender også den gamle tjeklistetekst.
 function decodeBlock(block, index) {

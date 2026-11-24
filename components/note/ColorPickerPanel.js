@@ -1,5 +1,5 @@
 import styles from "./ToolPanel.module.css";
-import { iconPath } from "../iconPath";
+import { iconPath } from "@/lib/iconPath";
 import noteColors from "./noteColors";
 
 // Viser farver, så brugeren kan ændre notens baggrund.

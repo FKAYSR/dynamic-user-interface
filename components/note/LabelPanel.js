@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import styles from "./ToolPanel.module.css";
-import { iconPath } from "../iconPath";
+import { iconPath } from "@/lib/iconPath";
 
 const icons = {
   activities: "1st-medal archery arrow-archery basketball-field basketball beer billiard birthday-cake bonfire book-stack book bookmark-book bowling-ball boxing-glove cinema-old cocktail cycling dart design-pencil dices disco favourite-book fire-flame Fishing flower football-ball football golf gym headphones hourglass karaoke leaderboard-star leaderboard locked-book lullaby magic-wand math-book medal movie music-double-note no-smoking-circle no-smoking open-book palette puzzle quiz rings running sea-and-sun sea-waves skateboard skateboarding smoking soccer-ball stretching swimming table tennis-ball-alt tennis-ball treadmill trekking trophy waist walking yoga",

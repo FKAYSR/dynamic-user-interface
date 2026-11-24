@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { iconPath } from "../iconPath";
+import { iconPath } from "@/lib/iconPath";
 import styles from "./SearchField.module.css";
 
 // Viser et søgefelt med tilbage-link og sender formularen videre til søgeren.

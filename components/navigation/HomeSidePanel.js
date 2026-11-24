@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import noteColors from "@/components/note/noteColors";
 import LabelPanel from "@/components/note/LabelPanel";
 import styles from "./HomeSidePanel.module.css";
-import { iconPath } from "../iconPath";
+import { iconPath } from "@/lib/iconPath";
 import { getBoardHref, sortBoardsByLastAccessed } from "./boardUtils";
 import Image from "next/image";
 import Link from "next/link";

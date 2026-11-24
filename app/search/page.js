@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import noteColors from "@/components/note/noteColors";
 import SearchBrowser from "@/components/search/SearchBrowser";
-import { iconPath } from "@/components/iconPath";
+import { iconPath } from "@/lib/iconPath";
 
 const typeOptions = [
   { id: "text", name: "Tekst", icon: iconPath("Aa.svg") },

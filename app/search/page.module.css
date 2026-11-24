@@ -5,12 +5,6 @@
   background: var(--colors-background);
 }
 
-.pageHeading {
-  padding: 0 16px;
-  color: var(--colors-text);
-  font-size: var(--typography-sizes-h2);
-}
-
 .emptyState {
   padding: 16px;
   color: var(--colors-neutral-600);

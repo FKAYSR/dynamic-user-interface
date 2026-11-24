@@ -1,6 +1,6 @@
 import styles from "./ToolPanel.module.css";
 import RippleEffect, { useRipple } from "./RippleEffect";
-import { iconPath } from "../iconPath";
+import { iconPath } from "@/lib/iconPath";
 
 const tools = [
   { label: "Overskrift 1", icon: "h1.svg", action: "h1" },
