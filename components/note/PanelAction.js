@@ -3,6 +3,7 @@
 import styles from "./ToolPanel.module.css";
 import RippleEffect, { useRipple } from "./RippleEffect";
 import { iconPath } from "@/lib/iconPath";
+import Image from "next/image";
 
 // Viser én knap i et værktøjspanel med ikon, tekst og trykanimation.
 export default function PanelAction({ icon, label, onClick, disabled = false }) {
@@ -21,7 +22,7 @@ export default function PanelAction({ icon, label, onClick, disabled = false }) 
       }}
     >
       <RippleEffect ripple={ripple} onFinish={finishRipple} />
-      <img src={iconPath(icon)} alt="" />
+      <Image src={iconPath(icon)} alt="" width={48} height={48} />
       <span>{label}</span>
     </button>
   );

@@ -116,7 +116,10 @@
 
 .itemRow img {
   display: block;
+  width: var(--icons-dimensions);
+  height: var(--icons-dimensions);
   flex: 0 0 auto;
+  object-fit: contain;
   position: relative;
   z-index: 1;
 }

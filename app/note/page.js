@@ -217,7 +217,7 @@ export default function NotePage({ initialNote = null }) {
       : "var(--baggrund)",
   );
   const nextBlockId = useRef(
-    getNoteBlocks(initialNote?.content).reduce(
+    decodeInitialContent(initialNote?.content).reduce(
       (highestId, block) => Math.max(highestId, Number(block.id) || 0),
       0,
     ),
